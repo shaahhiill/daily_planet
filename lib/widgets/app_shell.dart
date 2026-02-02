@@ -149,7 +149,7 @@ class _AppShellState extends ConsumerState<AppShell> {
                   style: TextStyle(
                     color: isSelected
                         ? const Color(0xFFE53935)
-                        : isDark ? Colors.white70 : Colors.black70,
+                        : isDark ? Colors.white70 : Colors.black.withOpacity(0.7),
                     fontSize: 16,
                     fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                   ),
