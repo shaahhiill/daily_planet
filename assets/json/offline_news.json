@@ -1,0 +1,47 @@
+[
+  {
+    "source": "The Washington Post",
+    "title": "Breaking: Major Climate Summit Reaches Historic Agreement",
+    "description": "World leaders have agreed to ambitious new carbon reduction targets in a landmark deal.",
+    "author": "Sarah Johnson",
+    "publishedAt": "2026-01-30T10:00:00Z",
+    "category": "politics",
+    "urlToImage": ""
+  },
+  {
+    "source": "ESPN",
+    "title": "Champions League Final Set for Dramatic Showdown",
+    "description": "Two powerhouse clubs prepare for an epic battle in the most-watched football event of the season.",
+    "author": "Mike Chen",
+    "publishedAt": "2026-01-30T09:00:00Z",
+    "category": "sports",
+    "urlToImage": ""
+  },
+  {
+    "source": "TechCrunch",
+    "title": "AI Startup Raises $2B in Largest Funding Round of 2026",
+    "description": "The company's breakthrough in natural language processing has attracted major venture capital interest.",
+    "author": "Emily Ross",
+    "publishedAt": "2026-01-30T08:00:00Z",
+    "category": "technology",
+    "urlToImage": ""
+  },
+  {
+    "source": "Vogue",
+    "title": "Paris Fashion Week Trends That Will Define 2026",
+    "description": "From bold colors to minimalist silhouettes, here are the standout looks from the runway.",
+    "author": "Lisa Park",
+    "publishedAt": "2026-01-30T07:00:00Z",
+    "category": "entertainment",
+    "urlToImage": ""
+  },
+  {
+    "source": "BBC Sport",
+    "title": "NBA Playoffs: Upset Victory Shocks Basketball World",
+    "description": "The underdog team stunned fans with a dramatic comeback in the final quarter to advance.",
+    "author": "James Wright",
+    "publishedAt": "2026-01-30T06:00:00Z",
+    "category": "sports",
+    "urlToImage": ""
+  }
+]

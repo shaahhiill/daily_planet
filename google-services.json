@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "595813205305",
+    "project_id": "dailyplanet-72e33",
+    "storage_bucket": "dailyplanet-72e33.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:595813205305:android:c23ea48ee14a9609dc14e8",
+        "android_client_info": {
+          "package_name": "Daily.Planet.News.Application"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDfjeNxSZo0HK-UBxo9j0S0hiJ5fx2wIIM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
