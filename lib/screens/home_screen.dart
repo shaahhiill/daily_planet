@@ -4,9 +4,6 @@ import '../providers/news_provider.dart';
 import '../widgets/hero_card.dart';
 import '../widgets/news_card.dart';
 import 'article_detail_screen.dart';
-import '../providers/device_provider.dart';
-import 'package:battery_plus/battery_plus.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
 
 /// Home screen - displays Editor's Pick carousel and latest news grid
 /// This is the main landing screen after login
@@ -137,19 +134,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
           const Spacer(),
 
-          // Device capabilities widgets (battery, location, connectivity)
-          // Battery status widget
-          _buildBatteryWidget(ref, isDark),
-
-          const SizedBox(width: 8),
-
-          // Location widget
-          _buildLocationWidget(ref, isDark),
-
-          const SizedBox(width: 8),
-
-          // Connectivity status widget
-          _buildConnectivityWidget(ref, isDark),
+          // Weather widget on the right (hardcoded for now)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF1A1A1A) : Colors.white,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.wb_sunny, color: Color(0xFFE53935), size: 18),
+                const SizedBox(width: 6),
+                Text(
+                  '26°C',
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.black,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -227,201 +233,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
         const SizedBox(height: 16),
       ],
-    );
-  }
-
-  /// Build battery status widget
-  /// Shows battery icon, percentage, and charging state
-  /// Parameters:
-  /// - ref: WidgetRef to access providers
-  /// - isDark: Whether dark mode is active
-  Widget _buildBatteryWidget(WidgetRef ref, bool isDark) {
-    // Watch battery level and state providers
-    final batteryLevelAsync = ref.watch(batteryLevelProvider);
-    final batteryStateAsync = ref.watch(batteryStateProvider);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1A1A1A) : Colors.white,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Battery icon (changes based on charging state)
-          batteryStateAsync.when(
-            data: (state) => Icon(
-              // Show charging icon if charging, otherwise battery icon
-              state == BatteryState.charging
-                  ? Icons.battery_charging_full
-                  : Icons.battery_std,
-              color: const Color(0xFFE53935),
-              size: 18,
-            ),
-            loading: () => const Icon(Icons.battery_unknown, size: 18),
-            error: (_, __) => const Icon(Icons.battery_alert, size: 18),
-          ),
-          const SizedBox(width: 6),
-          // Battery percentage text
-          batteryLevelAsync.when(
-            data: (level) => Text(
-              '$level%',
-              style: TextStyle(
-                color: isDark ? Colors.white : Colors.black,
-                fontSize: 13,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            loading: () => Text(
-              '...',
-              style: TextStyle(
-                color: isDark ? Colors.white : Colors.black,
-                fontSize: 13,
-              ),
-            ),
-            error: (_, __) => Text(
-              'N/A',
-              style: TextStyle(
-                color: isDark ? Colors.white : Colors.black,
-                fontSize: 13,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Build location widget
-  /// Shows location icon and lat/long coordinates
-  /// Parameters:
-  /// - ref: WidgetRef to access providers
-  /// - isDark: Whether dark mode is active
-  Widget _buildLocationWidget(WidgetRef ref, bool isDark) {
-    // Watch location provider
-    final locationAsync = ref.watch(locationProvider);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1A1A1A) : Colors.white,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: locationAsync.when(
-        data: (position) {
-          if (position == null) {
-            // Location permission denied or service disabled
-            return Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.location_off,
-                    color: Color(0xFFE53935), size: 18),
-                const SizedBox(width: 6),
-                Text(
-                  'Off',
-                  style: TextStyle(
-                    color: isDark ? Colors.white : Colors.black,
-                    fontSize: 13,
-                  ),
-                ),
-              ],
-            );
-          }
-
-          // Show latitude and longitude (truncated for display)
-          return Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.location_on, color: Color(0xFFE53935), size: 18),
-              const SizedBox(width: 6),
-              Text(
-                '${position.latitude.toStringAsFixed(1)},${position.longitude.toStringAsFixed(1)}',
-                style: TextStyle(
-                  color: isDark ? Colors.white : Colors.black,
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          );
-        },
-        loading: () => Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(
-              width: 14,
-              height: 14,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: Color(0xFFE53935),
-              ),
-            ),
-          ],
-        ),
-        error: (_, __) => const Icon(Icons.location_off, size: 18),
-      ),
-    );
-  }
-
-  /// Build connectivity status widget
-  /// Shows wifi/mobile icon based on connection type
-  /// Parameters:
-  /// - ref: WidgetRef to access providers
-  /// - isDark: Whether dark mode is active
-  Widget _buildConnectivityWidget(WidgetRef ref, bool isDark) {
-    // Watch connectivity provider
-    final connectivityAsync = ref.watch(connectivityProvider);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1A1A1A) : Colors.white,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: connectivityAsync.when(
-        data: (results) {
-          // Determine icon and text based on connection type
-          IconData icon;
-          String label;
-
-          if (results.contains(ConnectivityResult.wifi)) {
-            // Connected via WiFi
-            icon = Icons.wifi;
-            label = 'WiFi';
-          } else if (results.contains(ConnectivityResult.mobile)) {
-            // Connected via mobile data
-            icon = Icons.signal_cellular_alt;
-            label = '4G';
-          } else if (results.contains(ConnectivityResult.ethernet)) {
-            // Connected via ethernet
-            icon = Icons.lan;
-            label = 'LAN';
-          } else {
-            // No connection
-            icon = Icons.wifi_off;
-            label = 'Off';
-          }
-
-          return Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, color: const Color(0xFFE53935), size: 18),
-              const SizedBox(width: 6),
-              Text(
-                label,
-                style: TextStyle(
-                  color: isDark ? Colors.white : Colors.black,
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          );
-        },
-        loading: () => const Icon(Icons.wifi, size: 18),
-        error: (_, __) => const Icon(Icons.wifi_off, size: 18),
-      ),
     );
   }
 }
