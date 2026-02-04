@@ -370,9 +370,9 @@ class ArticleDetailScreen extends ConsumerWidget {
         // Row of social media icons
         Row(
           children: [
-            // WhatsApp share button
+            // WhatsApp share button (using chat icon)
             _buildShareButton(
-              icon: Icons.whatsapp,
+              icon: Icons.chat,
               color: const Color(0xFF25D366), // WhatsApp green
               onTap: () => _shareToWhatsApp(),
               isDark: isDark,
@@ -380,9 +380,9 @@ class ArticleDetailScreen extends ConsumerWidget {
 
             const SizedBox(width: 12),
 
-            // Facebook share button
+            // Facebook share button (using public icon)
             _buildShareButton(
-              icon: Icons.facebook,
+              icon: Icons.public,
               color: const Color(0xFF1877F2), // Facebook blue
               onTap: () => _shareToFacebook(),
               isDark: isDark,
@@ -390,10 +390,9 @@ class ArticleDetailScreen extends ConsumerWidget {
 
             const SizedBox(width: 12),
 
-            // Twitter/X share button
+            // Twitter/X share button (using X text label)
             _buildShareButton(
-              // Using close icon as X logo approximation
-              icon: Icons.close,
+              icon: Icons.close, // Placeholder icon, will show X label instead
               color: Colors.black,
               onTap: () => _shareToTwitter(),
               isDark: isDark,
@@ -402,7 +401,7 @@ class ArticleDetailScreen extends ConsumerWidget {
 
             const SizedBox(width: 12),
 
-            // Instagram share button (note: Instagram doesn't support direct URL sharing)
+            // Instagram share button (using camera icon)
             _buildShareButton(
               icon: Icons.camera_alt,
               color: const Color(0xFFE4405F), // Instagram pink
