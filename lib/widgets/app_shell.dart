@@ -5,6 +5,7 @@ import '../screens/explore_screen.dart';
 import '../screens/saved_screen.dart';
 import '../screens/search_screen.dart';
 import '../providers/auth_provider.dart';
+import '../providers/theme_provider.dart';
 
 class AppShell extends ConsumerStatefulWidget {
   const AppShell({super.key});
@@ -87,6 +88,18 @@ class _AppShellState extends ConsumerState<AppShell> {
           _buildNavIcon(Icons.explore_outlined, Icons.explore, 1, isDark),
           _buildNavIcon(Icons.bookmark_outline, Icons.bookmark, 2, isDark),
           _buildNavIcon(Icons.search, Icons.search, 3, isDark),
+          // Settings icon for theme toggle
+          GestureDetector(
+            onTap: () => _showThemeDialog(context),
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+              child: Icon(
+                Icons.settings,
+                color: isDark ? Colors.white54 : Colors.black54,
+                size: 24,
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -172,6 +185,43 @@ class _AppShellState extends ConsumerState<AppShell> {
             );
           }),
           const Spacer(),
+          // Theme toggle button
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: GestureDetector(
+              onTap: () {
+                // Toggle theme when tapped
+                ref.read(themeModeProvider.notifier).toggleTheme();
+              },
+              child: Consumer(
+                builder: (context, ref, _) {
+                  // Watch current theme mode
+                  final themeMode = ref.watch(themeModeProvider);
+                  final isLightMode = themeMode == ThemeMode.light;
+
+                  return Row(
+                    children: [
+                      Icon(
+                        // Show sun icon in dark mode, moon in light mode
+                        isLightMode ? Icons.dark_mode : Icons.light_mode,
+                        color: isDark ? Colors.white54 : Colors.black54,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        // Label changes based on current mode
+                        isLightMode ? 'Dark Mode' : 'Light Mode',
+                        style: TextStyle(
+                          color: isDark ? Colors.white54 : Colors.black54,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
+          ),
           Padding(
             padding: const EdgeInsets.all(16),
             child: GestureDetector(
@@ -194,6 +244,91 @@ class _AppShellState extends ConsumerState<AppShell> {
                   ),
                 ],
               ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Show dialog with theme toggle option
+  /// Allows user to switch between light and dark mode in portrait
+  void _showThemeDialog(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: isDark ? const Color(0xFF1A1A1A) : Colors.white,
+        title: Text(
+          'Settings',
+          style: TextStyle(
+            color: isDark ? Colors.white : Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: Consumer(
+          builder: (context, ref, _) {
+            // Watch current theme mode
+            final themeMode = ref.watch(themeModeProvider);
+            final isLightMode = themeMode == ThemeMode.light;
+
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Theme toggle row
+                InkWell(
+                  onTap: () {
+                    // Toggle theme
+                    ref.read(themeModeProvider.notifier).toggleTheme();
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    child: Row(
+                      children: [
+                        Icon(
+                          // Show sun/moon icon based on current mode
+                          isLightMode ? Icons.dark_mode : Icons.light_mode,
+                          color: const Color(0xFFE53935),
+                          size: 24,
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Text(
+                            'Theme',
+                            style: TextStyle(
+                              color: isDark ? Colors.white : Colors.black,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                        // Show current theme mode
+                        Text(
+                          isLightMode ? 'Light' : 'Dark',
+                          style: TextStyle(
+                            color: isDark ? Colors.white54 : Colors.black54,
+                            fontSize: 14,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Icon(
+                          Icons.chevron_right,
+                          color: isDark ? Colors.white54 : Colors.black54,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text(
+              'Close',
+              style: TextStyle(color: Color(0xFFE53935)),
             ),
           ),
         ],
