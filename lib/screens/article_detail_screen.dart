@@ -9,40 +9,187 @@ import '../providers/saved_provider.dart';
 /// Article detail screen - displays full article content
 /// Shows image, title, description, author, time, and save button
 /// User can bookmark/unbookmark articles from here
+/// Supports swipe gestures to navigate to next/previous article
 /// This is the master/detail pattern required by marking scheme
-class ArticleDetailScreen extends ConsumerWidget {
-  // The article to display
+class ArticleDetailScreen extends ConsumerStatefulWidget {
+  // The current article to display
   final Article article;
+
+  // List of all articles (for swipe navigation)
+  final List<Article>? articleList;
+
+  // Index of current article in the list
+  final int? currentIndex;
 
   const ArticleDetailScreen({
     super.key,
     required this.article,
+    this.articleList,
+    this.currentIndex,
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ArticleDetailScreen> createState() =>
+      _ArticleDetailScreenState();
+}
+
+class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
+  // Track the current article being displayed
+  late Article currentArticle;
+  late int currentIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize with the passed article
+    currentArticle = widget.article;
+    currentIndex = widget.currentIndex ?? 0;
+  }
+
+  @override
+  Widget build(BuildContext context) {
     // Check if dark mode is active
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // Check if this article is currently saved
-    // This automatically updates when user saves/unsaves
     final savedNotifier = ref.watch(savedArticlesProvider.notifier);
-    final isSaved = savedNotifier.isSaved(article);
+    final isSaved = savedNotifier.isSaved(currentArticle);
 
-    return Scaffold(
-      // Background color based on theme
-      backgroundColor:
-          isDark ? const Color(0xFF0A0A0A) : const Color(0xFFF5F5F5),
-      body: CustomScrollView(
-        slivers: [
-          // Top app bar with back button and save button
-          _buildAppBar(context, ref, isDark, isSaved, savedNotifier),
+    return GestureDetector(
+      // Detect horizontal swipe gestures
+      onHorizontalDragEnd: (details) {
+        // Check if we have an article list for navigation
+        if (widget.articleList == null || widget.articleList!.isEmpty) {
+          return;
+        }
 
-          // Article content (image, title, description, etc.)
-          SliverToBoxAdapter(
-            child: _buildContent(isDark),
-          ),
-        ],
+        // Swipe right (positive velocity) = go to previous article
+        if (details.primaryVelocity! > 0) {
+          _navigateToPrevious();
+        }
+        // Swipe left (negative velocity) = go to next article
+        else if (details.primaryVelocity! < 0) {
+          _navigateToNext();
+        }
+      },
+      child: Scaffold(
+        backgroundColor:
+            isDark ? const Color(0xFF0A0A0A) : const Color(0xFFF5F5F5),
+        body: Stack(
+          children: [
+            // Main content
+            CustomScrollView(
+              slivers: [
+                _buildAppBar(context, ref, isDark, isSaved, savedNotifier),
+                SliverToBoxAdapter(
+                  child: _buildContent(isDark),
+                ),
+              ],
+            ),
+
+            // Navigation indicators (show current position in article list)
+            if (widget.articleList != null && widget.articleList!.length > 1)
+              _buildNavigationIndicators(isDark),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Navigate to previous article in the list
+  /// Triggered by swiping right
+  void _navigateToPrevious() {
+    if (widget.articleList == null || currentIndex <= 0) {
+      // Already at first article, show feedback
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Already at the first article'),
+          duration: Duration(seconds: 1),
+          backgroundColor: Color(0xFFE53935),
+        ),
+      );
+      return;
+    }
+
+    // Update to previous article
+    setState(() {
+      currentIndex--;
+      currentArticle = widget.articleList![currentIndex];
+    });
+  }
+
+  /// Navigate to next article in the list
+  /// Triggered by swiping left
+  void _navigateToNext() {
+    if (widget.articleList == null ||
+        currentIndex >= widget.articleList!.length - 1) {
+      // Already at last article, show feedback
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Already at the last article'),
+          duration: Duration(seconds: 1),
+          backgroundColor: Color(0xFFE53935),
+        ),
+      );
+      return;
+    }
+
+    // Update to next article
+    setState(() {
+      currentIndex++;
+      currentArticle = widget.articleList![currentIndex];
+    });
+  }
+
+  /// Build navigation indicators showing current position
+  /// Shows dots at bottom indicating which article user is viewing
+  /// Parameters:
+  /// - isDark: Whether dark mode is active
+  Widget _buildNavigationIndicators(bool isDark) {
+    return Positioned(
+      bottom: 20,
+      left: 0,
+      right: 0,
+      child: SafeArea(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Left arrow hint
+            Icon(
+              Icons.arrow_back_ios,
+              size: 16,
+              color: currentIndex > 0
+                  ? Colors.white.withOpacity(0.7)
+                  : Colors.white.withOpacity(0.3),
+            ),
+            const SizedBox(width: 8),
+            // Position text (e.g., "3 / 10")
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.6),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                '${currentIndex + 1} / ${widget.articleList!.length}',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            // Right arrow hint
+            Icon(
+              Icons.arrow_forward_ios,
+              size: 16,
+              color: currentIndex < widget.articleList!.length - 1
+                  ? Colors.white.withOpacity(0.7)
+                  : Colors.white.withOpacity(0.3),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -106,7 +253,7 @@ class ArticleDetailScreen extends ConsumerWidget {
                 // Toggle save state when tapped
                 if (isSaved) {
                   // Remove from saved articles
-                  savedNotifier.removeArticle(article);
+                  savedNotifier.removeArticle(currentArticle);
                   // Show feedback to user
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
@@ -117,7 +264,7 @@ class ArticleDetailScreen extends ConsumerWidget {
                   );
                 } else {
                   // Add to saved articles
-                  savedNotifier.addArticle(article);
+                  savedNotifier.addArticle(currentArticle);
                   // Show feedback to user
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
@@ -145,7 +292,8 @@ class ArticleDetailScreen extends ConsumerWidget {
   /// - isDark: Whether dark mode is active
   Widget _buildHeaderImage(bool isDark) {
     // Check if article has an image
-    if (article.urlToImage == null || article.urlToImage!.isEmpty) {
+    if (currentArticle.urlToImage == null ||
+        currentArticle.urlToImage!.isEmpty) {
       // Fallback placeholder when no image available
       return Container(
         color: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE0E0E0),
@@ -164,7 +312,7 @@ class ArticleDetailScreen extends ConsumerWidget {
       fit: StackFit.expand,
       children: [
         CachedNetworkImage(
-          imageUrl: article.urlToImage!,
+          imageUrl: currentArticle.urlToImage!,
           fit: BoxFit.cover,
           // Show spinner while loading
           placeholder: (context, url) => Container(
@@ -213,7 +361,7 @@ class ArticleDetailScreen extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Source label (e.g., "BBC News", "CNN")
-          if (article.source != null)
+          if (currentArticle.source != null)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
@@ -221,7 +369,7 @@ class ArticleDetailScreen extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
-                article.source!,
+                currentArticle.source!,
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 12,
@@ -234,7 +382,7 @@ class ArticleDetailScreen extends ConsumerWidget {
 
           // Article title - large and bold
           Text(
-            article.title ?? 'No title',
+            currentArticle.title ?? 'No title',
             style: TextStyle(
               color: isDark ? Colors.white : Colors.black,
               fontSize: 26,
@@ -249,10 +397,10 @@ class ArticleDetailScreen extends ConsumerWidget {
           Row(
             children: [
               // Author name
-              if (article.author != null) ...[
+              if (currentArticle.author != null) ...[
                 Expanded(
                   child: Text(
-                    article.author!,
+                    currentArticle.author!,
                     style: TextStyle(
                       color: isDark ? Colors.white70 : Colors.black87,
                       fontSize: 14,
@@ -270,9 +418,9 @@ class ArticleDetailScreen extends ConsumerWidget {
                 ),
               ],
               // Published time
-              if (article.publishedAt != null)
+              if (currentArticle.publishedAt != null)
                 Text(
-                  _formatDate(article.publishedAt!),
+                  _formatDate(currentArticle.publishedAt!),
                   style: TextStyle(
                     color: isDark ? Colors.white54 : Colors.black54,
                     fontSize: 14,
@@ -292,9 +440,9 @@ class ArticleDetailScreen extends ConsumerWidget {
           const SizedBox(height: 24),
 
           // Article description/content
-          if (article.description != null)
+          if (currentArticle.description != null)
             Text(
-              article.description!,
+              currentArticle.description!,
               style: TextStyle(
                 color: isDark
                     ? Colors.white.withOpacity(0.85)
@@ -466,7 +614,7 @@ class ArticleDetailScreen extends ConsumerWidget {
   /// Share article to WhatsApp
   /// Opens WhatsApp with pre-filled message containing article title and URL
   void _shareToWhatsApp() async {
-    final text = '${article.title}\n\n${article.url ?? ''}';
+    final text = '${currentArticle.title}\n\n${currentArticle.url ?? ''}';
     final url = Uri.parse('https://wa.me/?text=${Uri.encodeComponent(text)}');
 
     if (await canLaunchUrl(url)) {
@@ -477,10 +625,10 @@ class ArticleDetailScreen extends ConsumerWidget {
   /// Share article to Facebook
   /// Opens Facebook with URL to share
   void _shareToFacebook() async {
-    if (article.url == null) return;
+    if (currentArticle.url == null) return;
 
     final url = Uri.parse(
-        'https://www.facebook.com/sharer/sharer.php?u=${Uri.encodeComponent(article.url!)}');
+        'https://www.facebook.com/sharer/sharer.php?u=${Uri.encodeComponent(currentArticle.url!)}');
 
     if (await canLaunchUrl(url)) {
       await launchUrl(url, mode: LaunchMode.externalApplication);
@@ -490,9 +638,9 @@ class ArticleDetailScreen extends ConsumerWidget {
   /// Share article to Twitter/X
   /// Opens Twitter with pre-filled tweet containing article title and URL
   void _shareToTwitter() async {
-    final text = article.title ?? '';
+    final text = currentArticle.title ?? '';
     final url = Uri.parse(
-        'https://twitter.com/intent/tweet?text=${Uri.encodeComponent(text)}&url=${Uri.encodeComponent(article.url ?? '')}');
+        'https://twitter.com/intent/tweet?text=${Uri.encodeComponent(text)}&url=${Uri.encodeComponent(currentArticle.url ?? '')}');
 
     if (await canLaunchUrl(url)) {
       await launchUrl(url, mode: LaunchMode.externalApplication);
