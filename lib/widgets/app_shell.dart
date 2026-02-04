@@ -35,7 +35,8 @@ class _AppShellState extends ConsumerState<AppShell> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF0A0A0A) : const Color(0xFFF5F5F5),
+      backgroundColor:
+          isDark ? const Color(0xFF0A0A0A) : const Color(0xFFF5F5F5),
       body: orientation == Orientation.landscape
           ? _buildLandscapeLayout(context, isDark)
           : _buildPortraitLayout(context, isDark),
@@ -91,12 +92,15 @@ class _AppShellState extends ConsumerState<AppShell> {
     );
   }
 
-  Widget _buildNavIcon(IconData unselected, IconData selected, int index, bool isDark) {
+  Widget _buildNavIcon(
+      IconData unselected, IconData selected, int index, bool isDark) {
     final isSelected = _currentIndex == index;
     return GestureDetector(
       onTap: () {
         setState(() => _currentIndex = index);
-        _pageController.animateToPage(index, duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
+        _pageController.animateToPage(index,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut);
       },
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
@@ -104,7 +108,9 @@ class _AppShellState extends ConsumerState<AppShell> {
           isSelected ? selected : unselected,
           color: isSelected
               ? const Color(0xFFE53935)
-              : isDark ? Colors.white54 : Colors.black54,
+              : isDark
+                  ? Colors.white54
+                  : Colors.black54,
           size: 24,
         ),
       ),
@@ -132,14 +138,19 @@ class _AppShellState extends ConsumerState<AppShell> {
               onTap: () => setState(() => _currentIndex = index),
               child: Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? (isDark ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.05))
+                      ? (isDark
+                          ? Colors.white.withOpacity(0.08)
+                          : Colors.black.withOpacity(0.05))
                       : Colors.transparent,
                   border: Border(
                     left: BorderSide(
-                      color: isSelected ? const Color(0xFFE53935) : Colors.transparent,
+                      color: isSelected
+                          ? const Color(0xFFE53935)
+                          : Colors.transparent,
                       width: 3,
                     ),
                   ),
@@ -149,9 +160,12 @@ class _AppShellState extends ConsumerState<AppShell> {
                   style: TextStyle(
                     color: isSelected
                         ? const Color(0xFFE53935)
-                        : isDark ? Colors.white70 : Colors.black.withOpacity(0.7),
+                        : isDark
+                            ? Colors.white70
+                            : Colors.black.withOpacity(0.7),
                     fontSize: 16,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    fontWeight:
+                        isSelected ? FontWeight.bold : FontWeight.normal,
                   ),
                 ),
               ),
@@ -167,7 +181,9 @@ class _AppShellState extends ConsumerState<AppShell> {
               },
               child: Row(
                 children: [
-                  Icon(Icons.logout, color: isDark ? Colors.white54 : Colors.black54, size: 20),
+                  Icon(Icons.logout,
+                      color: isDark ? Colors.white54 : Colors.black54,
+                      size: 20),
                   const SizedBox(width: 10),
                   Text(
                     'Logout',
