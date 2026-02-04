@@ -32,7 +32,8 @@ class CategoryScreen extends ConsumerWidget {
 
     return Scaffold(
       // Background color based on theme
-      backgroundColor: isDark ? const Color(0xFF0A0A0A) : const Color(0xFFF5F5F5),
+      backgroundColor:
+          isDark ? const Color(0xFF0A0A0A) : const Color(0xFFF5F5F5),
       body: SafeArea(
         child: Column(
           children: [
