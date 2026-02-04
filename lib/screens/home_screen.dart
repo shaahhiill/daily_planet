@@ -36,7 +36,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final newsAsync = ref.watch(topHeadlinesProvider(null));
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF0A0A0A) : const Color(0xFFF5F5F5),
+      backgroundColor:
+          isDark ? const Color(0xFF0A0A0A) : const Color(0xFFF5F5F5),
       body: SafeArea(
         child: newsAsync.when(
           // Loading state - show spinner
@@ -96,7 +97,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => ArticleDetailScreen(article: article),
+                                builder: (_) =>
+                                    ArticleDetailScreen(article: article),
                               ),
                             );
                           },
@@ -117,7 +119,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   /// Build the top app bar with Daily Planet logo and weather widget
   Widget _buildAppBar(bool isDark) {
     return SliverAppBar(
-      backgroundColor: isDark ? const Color(0xFF0A0A0A) : const Color(0xFFF5F5F5),
+      backgroundColor:
+          isDark ? const Color(0xFF0A0A0A) : const Color(0xFFF5F5F5),
       pinned: true, // Keep visible when scrolling
       elevation: 0,
       toolbarHeight: 70,
@@ -151,25 +154,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                 ),
               ],
-            ),
-          ),
-          const SizedBox(width: 12),
-
-          // Search icon button
-          Container(
-            decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF1A1A1A) : Colors.white,
-              shape: BoxShape.circle,
-            ),
-            child: IconButton(
-              icon: Icon(
-                Icons.search,
-                color: isDark ? Colors.white : Colors.black,
-                size: 22,
-              ),
-              onPressed: () {
-                // TODO: Navigate to search when implemented
-              },
             ),
           ),
         ],
