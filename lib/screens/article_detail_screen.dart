@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../models/article.dart';
 import '../providers/saved_provider.dart';
 
@@ -305,6 +306,11 @@ class ArticleDetailScreen extends ConsumerWidget {
 
           const SizedBox(height: 24),
 
+          // Social media share buttons section
+          _buildShareSection(isDark),
+
+          const SizedBox(height: 24),
+
           // Note about full article
           Container(
             padding: const EdgeInsets.all(16),
@@ -338,6 +344,177 @@ class ArticleDetailScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  /// Build social media share buttons
+  /// Shows Instagram, WhatsApp, Facebook, Twitter icons
+  /// Taps open respective apps with pre-filled share text
+  /// Parameters:
+  /// - isDark: Whether dark mode is active
+  Widget _buildShareSection(bool isDark) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // "Share Article" heading
+        Text(
+          'Share Article',
+          style: TextStyle(
+            color: isDark ? Colors.white : Colors.black,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+
+        const SizedBox(height: 12),
+
+        // Row of social media icons
+        Row(
+          children: [
+            // WhatsApp share button
+            _buildShareButton(
+              icon: Icons.whatsapp,
+              color: const Color(0xFF25D366), // WhatsApp green
+              onTap: () => _shareToWhatsApp(),
+              isDark: isDark,
+            ),
+
+            const SizedBox(width: 12),
+
+            // Facebook share button
+            _buildShareButton(
+              icon: Icons.facebook,
+              color: const Color(0xFF1877F2), // Facebook blue
+              onTap: () => _shareToFacebook(),
+              isDark: isDark,
+            ),
+
+            const SizedBox(width: 12),
+
+            // Twitter/X share button
+            _buildShareButton(
+              // Using close icon as X logo approximation
+              icon: Icons.close,
+              color: Colors.black,
+              onTap: () => _shareToTwitter(),
+              isDark: isDark,
+              label: 'X', // Show X label instead of icon
+            ),
+
+            const SizedBox(width: 12),
+
+            // Instagram share button (note: Instagram doesn't support direct URL sharing)
+            _buildShareButton(
+              icon: Icons.camera_alt,
+              color: const Color(0xFFE4405F), // Instagram pink
+              onTap: () => _shareToInstagram(),
+              isDark: isDark,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  /// Build individual social media share button
+  /// Parameters:
+  /// - icon: Icon to display
+  /// - color: Brand color for the button
+  /// - onTap: Callback when button is tapped
+  /// - isDark: Whether dark mode is active
+  /// - label: Optional text label instead of icon
+  Widget _buildShareButton({
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+    required bool isDark,
+    String? label,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 60,
+        height: 60,
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: color.withOpacity(0.3),
+            width: 1.5,
+          ),
+        ),
+        child: Center(
+          child: label != null
+              // Show text label (for X/Twitter)
+              ? Text(
+                  label,
+                  style: TextStyle(
+                    color: color,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                )
+              // Show icon
+              : Icon(
+                  icon,
+                  color: color,
+                  size: 28,
+                ),
+        ),
+      ),
+    );
+  }
+
+  /// Share article to WhatsApp
+  /// Opens WhatsApp with pre-filled message containing article title and URL
+  void _shareToWhatsApp() async {
+    final text = '${article.title}\n\n${article.url ?? ''}';
+    final url = Uri.parse('https://wa.me/?text=${Uri.encodeComponent(text)}');
+
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+    }
+  }
+
+  /// Share article to Facebook
+  /// Opens Facebook with URL to share
+  void _shareToFacebook() async {
+    if (article.url == null) return;
+
+    final url = Uri.parse(
+        'https://www.facebook.com/sharer/sharer.php?u=${Uri.encodeComponent(article.url!)}');
+
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+    }
+  }
+
+  /// Share article to Twitter/X
+  /// Opens Twitter with pre-filled tweet containing article title and URL
+  void _shareToTwitter() async {
+    final text = article.title ?? '';
+    final url = Uri.parse(
+        'https://twitter.com/intent/tweet?text=${Uri.encodeComponent(text)}&url=${Uri.encodeComponent(article.url ?? '')}');
+
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+    }
+  }
+
+  /// Share article to Instagram
+  /// Note: Instagram doesn't support direct URL sharing via deep links
+  /// This opens Instagram app, user must manually paste content
+  void _shareToInstagram() async {
+    // Instagram doesn't have a direct share URL scheme for articles
+    // Open Instagram app directly
+    final url = Uri.parse('instagram://');
+
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+    } else {
+      // If Instagram app not installed, open web version
+      final webUrl = Uri.parse('https://www.instagram.com/');
+      await launchUrl(webUrl, mode: LaunchMode.externalApplication);
+    }
   }
 
   /// Format the published date to readable format
