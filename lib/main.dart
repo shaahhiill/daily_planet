@@ -24,7 +24,7 @@ class DailyPlanetApp extends ConsumerWidget {
     return MaterialApp(
       title: 'Daily Planet',
       debugShowCheckedModeBanner: false,
-      themeMode: ThemeMode.system,
+      themeMode: ThemeMode.dark,
       theme: _buildTheme(Brightness.light),
       darkTheme: _buildTheme(Brightness.dark),
       home: authState.when(
@@ -51,8 +51,7 @@ class DailyPlanetApp extends ConsumerWidget {
         onSecondary: Colors.white,
         error: Colors.red,
         onError: Colors.white,
-        background:
-            isDark ? const Color(0xFF0A0A0A) : const Color(0xFFF5F5F5),
+        background: isDark ? const Color(0xFF0A0A0A) : const Color(0xFFF5F5F5),
         onBackground: isDark ? Colors.white : Colors.black,
         surface: isDark ? const Color(0xFF1A1A1A) : Colors.white,
         onSurface: isDark ? Colors.white : Colors.black,
@@ -71,13 +70,19 @@ class DailyPlanetApp extends ConsumerWidget {
             fontWeight: FontWeight.bold,
             fontSize: 18),
         bodyLarge: TextStyle(
-            color: isDark ? Colors.white.withOpacity(0.85) : Colors.black.withOpacity(0.85),
+            color: isDark
+                ? Colors.white.withOpacity(0.85)
+                : Colors.black.withOpacity(0.85),
             fontSize: 16),
         bodyMedium: TextStyle(
-            color: isDark ? Colors.white.withOpacity(0.6) : Colors.black.withOpacity(0.6),
+            color: isDark
+                ? Colors.white.withOpacity(0.6)
+                : Colors.black.withOpacity(0.6),
             fontSize: 14),
         bodySmall: TextStyle(
-            color: isDark ? Colors.white.withOpacity(0.4) : Colors.black.withOpacity(0.4),
+            color: isDark
+                ? Colors.white.withOpacity(0.4)
+                : Colors.black.withOpacity(0.4),
             fontSize: 12),
       ),
     );
