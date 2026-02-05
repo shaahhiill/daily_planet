@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/article.dart';
 import '../providers/saved_provider.dart';
+import '../providers/news_provider.dart';
 
 /// Article detail screen - displays full article content
 /// Shows image, title, description, author, time, and save button
@@ -489,6 +490,11 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
               ],
             ),
           ),
+
+          const SizedBox(height: 32),
+
+          // "You may also like" section with related articles
+          _buildRelatedArticles(isDark),
         ],
       ),
     );
@@ -662,6 +668,224 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
       final webUrl = Uri.parse('https://www.instagram.com/');
       await launchUrl(webUrl, mode: LaunchMode.externalApplication);
     }
+  }
+
+  /// Build "You may also like" section with related articles
+  /// Shows 5 articles from the same category
+  /// Parameters:
+  /// - isDark: Whether dark mode is active
+  Widget _buildRelatedArticles(bool isDark) {
+    // Get category from current article, default to general if none
+    final category = currentArticle.category;
+
+    // Fetch articles from same category
+    final relatedNewsAsync = ref.watch(topHeadlinesProvider(category));
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Section divider
+        Container(
+          height: 1,
+          color: isDark ? Colors.white12 : Colors.black12,
+        ),
+
+        const SizedBox(height: 24),
+
+        // "You may also like" heading
+        Text(
+          'You may also like',
+          style: TextStyle(
+            color: isDark ? Colors.white : Colors.black,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+
+        const SizedBox(height: 16),
+
+        // Related articles list
+        relatedNewsAsync.when(
+          // LOADING STATE: Show spinner
+          loading: () => const Center(
+            child: Padding(
+              padding: EdgeInsets.all(32.0),
+              child: CircularProgressIndicator(color: Color(0xFFE53935)),
+            ),
+          ),
+
+          // ERROR STATE: Show error message
+          error: (error, stack) => Center(
+            child: Padding(
+              padding: const EdgeInsets.all(32.0),
+              child: Text(
+                'Failed to load related articles',
+                style: TextStyle(
+                  color: isDark ? Colors.white54 : Colors.black54,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+          ),
+
+          // SUCCESS STATE: Show related articles
+          data: (articles) {
+            // Filter out the current article and take first 5
+            final relatedArticles = articles
+                .where((a) =>
+                    a.title !=
+                    currentArticle.title) // Don't show current article
+                .take(5) // Limit to 5 articles
+                .toList();
+
+            // If no related articles found
+            if (relatedArticles.isEmpty) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(32.0),
+                  child: Text(
+                    'No related articles found',
+                    style: TextStyle(
+                      color: isDark ? Colors.white54 : Colors.black54,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              );
+            }
+
+            // Build list of related article cards
+            return Column(
+              children: relatedArticles.map((article) {
+                return _buildRelatedArticleCard(article, isDark);
+              }).toList(),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  /// Build a single related article card
+  /// Smaller, compact version for "You may also like" section
+  /// Parameters:
+  /// - article: The article to display
+  /// - isDark: Whether dark mode is active
+  Widget _buildRelatedArticleCard(Article article, bool isDark) {
+    return GestureDetector(
+      onTap: () {
+        // Navigate to the related article's detail screen
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ArticleDetailScreen(
+              article: article,
+              articleList: widget.articleList,
+              currentIndex: widget.articleList?.indexOf(article) ?? 0,
+            ),
+          ),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF1A1A1A) : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isDark ? Colors.white12 : Colors.black12,
+          ),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Article thumbnail (small square image)
+            if (article.urlToImage != null && article.urlToImage!.isNotEmpty)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: CachedNetworkImage(
+                  imageUrl: article.urlToImage!,
+                  width: 80,
+                  height: 80,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => Container(
+                    width: 80,
+                    height: 80,
+                    color: isDark
+                        ? const Color(0xFF2A2A2A)
+                        : const Color(0xFFE0E0E0),
+                  ),
+                  errorWidget: (context, url, error) => Container(
+                    width: 80,
+                    height: 80,
+                    color: isDark
+                        ? const Color(0xFF2A2A2A)
+                        : const Color(0xFFE0E0E0),
+                    child: Icon(
+                      Icons.image_not_supported,
+                      size: 24,
+                      color: isDark ? Colors.white24 : Colors.black26,
+                    ),
+                  ),
+                ),
+              )
+            else
+              // Placeholder when no image
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? const Color(0xFF2A2A2A)
+                      : const Color(0xFFE0E0E0),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  Icons.article,
+                  size: 32,
+                  color: isDark ? Colors.white24 : Colors.black26,
+                ),
+              ),
+
+            const SizedBox(width: 12),
+
+            // Article title and source
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Source label in red
+                  if (article.source != null)
+                    Text(
+                      article.source!,
+                      style: const TextStyle(
+                        color: Color(0xFFE53935),
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+
+                  const SizedBox(height: 4),
+
+                  // Article title
+                  Text(
+                    article.title ?? 'No title',
+                    style: TextStyle(
+                      color: isDark ? Colors.white : Colors.black,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      height: 1.3,
+                    ),
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   /// Format the published date to readable format
