@@ -692,11 +692,11 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
 
         const SizedBox(height: 24),
 
-        // "You may also like" heading
+        // "You May Also Like" heading
         Text(
-          'You may also like',
+          'You May Also Like',
           style: TextStyle(
-            color: isDark ? Colors.white : Colors.black,
+            color: const Color(0xFFE53935), // Red heading like other sections
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
@@ -799,57 +799,7 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Article thumbnail (small square image)
-            if (article.urlToImage != null && article.urlToImage!.isNotEmpty)
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: CachedNetworkImage(
-                  imageUrl: article.urlToImage!,
-                  width: 80,
-                  height: 80,
-                  fit: BoxFit.cover,
-                  placeholder: (context, url) => Container(
-                    width: 80,
-                    height: 80,
-                    color: isDark
-                        ? const Color(0xFF2A2A2A)
-                        : const Color(0xFFE0E0E0),
-                  ),
-                  errorWidget: (context, url, error) => Container(
-                    width: 80,
-                    height: 80,
-                    color: isDark
-                        ? const Color(0xFF2A2A2A)
-                        : const Color(0xFFE0E0E0),
-                    child: Icon(
-                      Icons.image_not_supported,
-                      size: 24,
-                      color: isDark ? Colors.white24 : Colors.black26,
-                    ),
-                  ),
-                ),
-              )
-            else
-              // Placeholder when no image
-              Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? const Color(0xFF2A2A2A)
-                      : const Color(0xFFE0E0E0),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  Icons.article,
-                  size: 32,
-                  color: isDark ? Colors.white24 : Colors.black26,
-                ),
-              ),
-
-            const SizedBox(width: 12),
-
-            // Article title and source
+            // Article title and source (NOW ON LEFT)
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -882,6 +832,56 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
                 ],
               ),
             ),
+
+            const SizedBox(width: 12),
+
+            // Article thumbnail (NOW ON RIGHT)
+            if (article.urlToImage != null && article.urlToImage!.isNotEmpty)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: CachedNetworkImage(
+                  imageUrl: article.urlToImage!,
+                  width: 80,
+                  height: 80,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => Container(
+                    width: 80,
+                    height: 80,
+                    color: isDark
+                        ? const Color(0xFF2A2A2A)
+                        : const Color(0xFFE0E0E0),
+                  ),
+                  errorWidget: (context, url, error) => Container(
+                    width: 80,
+                    height: 80,
+                    color: isDark
+                        ? const Color(0xFF2A2A2A)
+                        : const Color(0xFFE0E0E0),
+                    child: Icon(
+                      Icons.image_not_supported,
+                      size: 24,
+                      color: isDark ? Colors.white24 : Colors.black26,
+                    ),
+                  ),
+                ),
+              )
+            else
+              // Placeholder when no image (also on right now)
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? const Color(0xFF2A2A2A)
+                      : const Color(0xFFE0E0E0),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  Icons.article,
+                  size: 32,
+                  color: isDark ? Colors.white24 : Colors.black26,
+                ),
+              ),
           ],
         ),
       ),

@@ -88,18 +88,6 @@ class _AppShellState extends ConsumerState<AppShell> {
           _buildNavIcon(Icons.explore_outlined, Icons.explore, 1, isDark),
           _buildNavIcon(Icons.bookmark_outline, Icons.bookmark, 2, isDark),
           _buildNavIcon(Icons.search, Icons.search, 3, isDark),
-          // Settings icon for theme toggle
-          GestureDetector(
-            onTap: () => _showThemeDialog(context),
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-              child: Icon(
-                Icons.settings,
-                color: isDark ? Colors.white54 : Colors.black54,
-                size: 24,
-              ),
-            ),
-          ),
         ],
       ),
     );
