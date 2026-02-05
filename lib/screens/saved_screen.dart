@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/saved_provider.dart';
+import '../models/article.dart';
 import '../widgets/news_card.dart';
 import 'article_detail_screen.dart';
 
@@ -21,7 +22,8 @@ class SavedScreen extends ConsumerWidget {
 
     return Scaffold(
       // Background color based on theme
-      backgroundColor: isDark ? const Color(0xFF0A0A0A) : const Color(0xFFF5F5F5),
+      backgroundColor:
+          isDark ? const Color(0xFF0A0A0A) : const Color(0xFFF5F5F5),
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -134,7 +136,7 @@ class SavedScreen extends ConsumerWidget {
   /// Parameters:
   /// - context: BuildContext for navigation
   /// - articles: List of saved Article objects
-  Widget _buildArticlesList(BuildContext context, List articles) {
+  Widget _buildArticlesList(BuildContext context, List<Article> articles) {
     return ListView.builder(
       // Padding around the entire list
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -153,7 +155,11 @@ class SavedScreen extends ConsumerWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) => ArticleDetailScreen(article: article),
+                builder: (_) => ArticleDetailScreen(
+                  article: article,
+                  articleList: articles,
+                  currentIndex: index,
+                ),
               ),
             );
           },

@@ -141,6 +141,8 @@ class CategoryScreen extends ConsumerWidget {
                                   MaterialPageRoute(
                                     builder: (_) => ArticleDetailScreen(
                                       article: featuredArticle,
+                                      articleList: articles,
+                                      currentIndex: 0,
                                     ),
                                   ),
                                 );
@@ -170,6 +172,9 @@ class CategoryScreen extends ConsumerWidget {
                                     MaterialPageRoute(
                                       builder: (_) => ArticleDetailScreen(
                                         article: article,
+                                        articleList: articles,
+                                        currentIndex: index +
+                                            1, // +1 because first is featured
                                       ),
                                     ),
                                   );

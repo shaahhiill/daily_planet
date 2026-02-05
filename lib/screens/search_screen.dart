@@ -291,7 +291,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => ArticleDetailScreen(article: article),
+                    builder: (_) => ArticleDetailScreen(
+                      article: article,
+                      articleList: articles,
+                      currentIndex: index,
+                    ),
                   ),
                 );
               },

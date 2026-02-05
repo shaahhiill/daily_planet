@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/news_provider.dart';
+import '../models/article.dart';
 import '../providers/device_provider.dart';
 import '../widgets/hero_card.dart';
 import '../widgets/news_card.dart';
@@ -89,8 +90,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (_) =>
-                                        ArticleDetailScreen(article: article),
+                                    builder: (_) => ArticleDetailScreen(
+                                      article: article,
+                                      articleList: gridArticles,
+                                      currentIndex: index,
+                                    ),
                                   ),
                                 );
                               },
@@ -159,7 +163,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   /// Build the Editor's Pick section with horizontal carousel
-  Widget _buildEditorsPick(List articles, bool isDark) {
+  Widget _buildEditorsPick(List<Article> articles, bool isDark) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -197,7 +201,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => ArticleDetailScreen(article: article),
+                      builder: (_) => ArticleDetailScreen(
+                        article: article,
+                        articleList: articles,
+                        currentIndex: index,
+                      ),
                     ),
                   );
                 },
