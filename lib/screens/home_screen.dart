@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/news_provider.dart';
 import '../models/article.dart';
 import '../providers/device_provider.dart';
+import '../providers/theme_provider.dart';
 import '../widgets/hero_card.dart';
 import '../widgets/news_card.dart';
 import 'article_detail_screen.dart';
@@ -155,6 +156,36 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                 ),
               ],
+            ),
+          ),
+
+          const SizedBox(width: 8),
+
+          // Theme toggle button
+          Container(
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF1A1A1A) : Colors.white,
+              shape: BoxShape.circle,
+            ),
+            child: Consumer(
+              builder: (context, ref, _) {
+                // Watch current theme mode
+                final themeMode = ref.watch(themeModeProvider);
+                final isLightMode = themeMode == ThemeMode.light;
+
+                return IconButton(
+                  icon: Icon(
+                    // Show sun icon in dark mode, moon in light mode
+                    isLightMode ? Icons.dark_mode : Icons.light_mode,
+                    color: isDark ? Colors.white : Colors.black,
+                    size: 22,
+                  ),
+                  onPressed: () {
+                    // Toggle theme when tapped
+                    ref.read(themeModeProvider.notifier).toggleTheme();
+                  },
+                );
+              },
             ),
           ),
         ],
