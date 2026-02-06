@@ -80,15 +80,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     SliverToBoxAdapter(
                       child: _buildEditorsPick(featuredArticles, isDark),
                     ),
-                    // News grid - first article full width, rest in 2 columns
+                    // News grid - horizontal cards like "You may also like"
                     SliverPadding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      padding: const EdgeInsets.all(16),
                       sliver: SliverList(
                         delegate: SliverChildBuilderDelegate(
                           (context, index) {
+                            final article = gridArticles[index];
+
+                            // First article: Slightly bigger/featured style
                             if (index == 0) {
-                              // FIRST ARTICLE: Full width, larger card
-                              final article = gridArticles[0];
                               return Padding(
                                 padding: const EdgeInsets.only(bottom: 16),
                                 child: NewsCard(
@@ -100,7 +101,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                         builder: (_) => ArticleDetailScreen(
                                           article: article,
                                           articleList: gridArticles,
-                                          currentIndex: 0,
+                                          currentIndex: index,
                                         ),
                                       ),
                                     );
@@ -109,59 +110,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               );
                             }
 
-                            // Calculate pair index for 2-column layout
-                            // Index 1 in delegate = first pair (articles at index 1 and 2)
-                            final pairIndex = index - 1;
-                            final leftArticleIndex = 1 + (pairIndex * 2);
-                            final rightArticleIndex = leftArticleIndex + 1;
-
-                            // Check if we have both articles for this row
-                            if (leftArticleIndex >= gridArticles.length) {
-                              return const SizedBox.shrink();
-                            }
-
-                            final leftArticle = gridArticles[leftArticleIndex];
-                            final rightArticle =
-                                rightArticleIndex < gridArticles.length
-                                    ? gridArticles[rightArticleIndex]
-                                    : null;
-
-                            // REST OF ARTICLES: 2-column grid layout
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 16),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  // Left column article
-                                  Expanded(
-                                    child: _buildCompactNewsCard(
-                                      leftArticle,
-                                      gridArticles,
-                                      leftArticleIndex,
-                                      isDark,
-                                    ),
-                                  ),
-
-                                  const SizedBox(width: 16),
-
-                                  // Right column article (if exists)
-                                  Expanded(
-                                    child: rightArticle != null
-                                        ? _buildCompactNewsCard(
-                                            rightArticle,
-                                            gridArticles,
-                                            rightArticleIndex,
-                                            isDark,
-                                          )
-                                        : const SizedBox.shrink(),
-                                  ),
-                                ],
-                              ),
-                            );
+                            // Rest: Horizontal compact cards
+                            return _buildHorizontalNewsCard(
+                                article, gridArticles, index, isDark);
                           },
-                          // Calculate child count: 1 (first article) + pairs of remaining articles
-                          childCount:
-                              1 + ((gridArticles.length - 1) / 2).ceil(),
+                          childCount: gridArticles.length,
                         ),
                       ),
                     ),
@@ -401,14 +354,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  /// Build compact news card for 2-column grid layout
-  /// Smaller version of NewsCard for half-width display
+  /// Build horizontal news card (image left/right, text opposite)
+  /// Compact layout matching "You may also like" style
   /// Parameters:
   /// - article: Article to display
   /// - articleList: Full list for navigation
   /// - index: Position in list
   /// - isDark: Whether dark mode is active
-  Widget _buildCompactNewsCard(
+  Widget _buildHorizontalNewsCard(
     Article article,
     List<Article> articleList,
     int index,
@@ -428,36 +381,40 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         );
       },
       child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF1A1A1A) : Colors.white,
           borderRadius: BorderRadius.circular(12),
         ),
-        child: Column(
+        child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Article image
+            // Article thumbnail on LEFT
             if (article.urlToImage != null && article.urlToImage!.isNotEmpty)
               ClipRRect(
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(12)),
+                borderRadius: BorderRadius.circular(8),
                 child: CachedNetworkImage(
                   imageUrl: article.urlToImage!,
-                  height: 120,
-                  width: double.infinity,
+                  width: 100,
+                  height: 100,
                   fit: BoxFit.cover,
                   placeholder: (context, url) => Container(
-                    height: 120,
+                    width: 100,
+                    height: 100,
                     color: isDark
                         ? const Color(0xFF2A2A2A)
                         : const Color(0xFFE0E0E0),
                   ),
                   errorWidget: (context, url, error) => Container(
-                    height: 120,
+                    width: 100,
+                    height: 100,
                     color: isDark
                         ? const Color(0xFF2A2A2A)
                         : const Color(0xFFE0E0E0),
                     child: Icon(
                       Icons.image_not_supported,
+                      size: 24,
                       color: isDark ? Colors.white24 : Colors.black26,
                     ),
                   ),
@@ -465,50 +422,51 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               )
             else
               Container(
-                height: 120,
+                width: 100,
+                height: 100,
                 decoration: BoxDecoration(
                   color: isDark
                       ? const Color(0xFF2A2A2A)
                       : const Color(0xFFE0E0E0),
-                  borderRadius:
-                      const BorderRadius.vertical(top: Radius.circular(12)),
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                child: Center(
-                  child: Icon(
-                    Icons.image_not_supported,
-                    color: isDark ? Colors.white24 : Colors.black26,
-                  ),
+                child: Icon(
+                  Icons.article,
+                  size: 32,
+                  color: isDark ? Colors.white24 : Colors.black26,
                 ),
               ),
 
-            // Article content
-            Padding(
-              padding: const EdgeInsets.all(12),
+            const SizedBox(width: 12),
+
+            // Article title and source on RIGHT
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Source label
+                  // Source label in red
                   if (article.source != null)
                     Text(
                       article.source!,
                       style: const TextStyle(
                         color: Color(0xFFE53935),
-                        fontSize: 10,
+                        fontSize: 11,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
+
                   const SizedBox(height: 6),
 
-                  // Title
+                  // Article title
                   Text(
                     article.title ?? 'No title',
                     style: TextStyle(
                       color: isDark ? Colors.white : Colors.black,
-                      fontSize: 13,
+                      fontSize: 15,
                       fontWeight: FontWeight.bold,
                       height: 1.3,
                     ),
-                    maxLines: 3,
+                    maxLines: 4,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
