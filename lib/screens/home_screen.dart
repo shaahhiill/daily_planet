@@ -88,7 +88,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           (context, index) {
                             final article = gridArticles[index];
 
-                            // First article: Slightly bigger/featured style
+                            // ONLY FIRST ARTICLE (index 0): Full size NewsCard
                             if (index == 0) {
                               return Padding(
                                 padding: const EdgeInsets.only(bottom: 16),
@@ -110,7 +110,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               );
                             }
 
-                            // Rest: Horizontal compact cards
+                            // ALL OTHER ARTICLES: Horizontal compact cards
                             return _buildHorizontalNewsCard(
                                 article, gridArticles, index, isDark);
                           },
@@ -390,7 +390,43 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Article thumbnail on LEFT
+            // Article title and source on LEFT
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Source label in red
+                  if (article.source != null)
+                    Text(
+                      article.source!,
+                      style: const TextStyle(
+                        color: Color(0xFFE53935),
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+
+                  const SizedBox(height: 6),
+
+                  // Article title
+                  Text(
+                    article.title ?? 'No title',
+                    style: TextStyle(
+                      color: isDark ? Colors.white : Colors.black,
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      height: 1.3,
+                    ),
+                    maxLines: 4,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(width: 12),
+
+            // Article thumbnail on RIGHT
             if (article.urlToImage != null && article.urlToImage!.isNotEmpty)
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
@@ -436,42 +472,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   color: isDark ? Colors.white24 : Colors.black26,
                 ),
               ),
-
-            const SizedBox(width: 12),
-
-            // Article title and source on RIGHT
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Source label in red
-                  if (article.source != null)
-                    Text(
-                      article.source!,
-                      style: const TextStyle(
-                        color: Color(0xFFE53935),
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-
-                  const SizedBox(height: 6),
-
-                  // Article title
-                  Text(
-                    article.title ?? 'No title',
-                    style: TextStyle(
-                      color: isDark ? Colors.white : Colors.black,
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                      height: 1.3,
-                    ),
-                    maxLines: 4,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
           ],
         ),
       ),
