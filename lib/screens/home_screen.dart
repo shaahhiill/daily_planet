@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../providers/news_provider.dart';
 import '../models/article.dart';
 import '../providers/device_provider.dart';
@@ -79,29 +80,88 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     SliverToBoxAdapter(
                       child: _buildEditorsPick(featuredArticles, isDark),
                     ),
+                    // News grid - first article full width, rest in 2 columns
                     SliverPadding(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
                       sliver: SliverList(
                         delegate: SliverChildBuilderDelegate(
                           (context, index) {
-                            final article = gridArticles[index];
-                            return NewsCard(
-                              article: article,
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => ArticleDetailScreen(
-                                      article: article,
-                                      articleList: gridArticles,
-                                      currentIndex: index,
+                            if (index == 0) {
+                              // FIRST ARTICLE: Full width, larger card
+                              final article = gridArticles[0];
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 16),
+                                child: NewsCard(
+                                  article: article,
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => ArticleDetailScreen(
+                                          article: article,
+                                          articleList: gridArticles,
+                                          currentIndex: 0,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              );
+                            }
+
+                            // Calculate pair index for 2-column layout
+                            // Index 1 in delegate = first pair (articles at index 1 and 2)
+                            final pairIndex = index - 1;
+                            final leftArticleIndex = 1 + (pairIndex * 2);
+                            final rightArticleIndex = leftArticleIndex + 1;
+
+                            // Check if we have both articles for this row
+                            if (leftArticleIndex >= gridArticles.length) {
+                              return const SizedBox.shrink();
+                            }
+
+                            final leftArticle = gridArticles[leftArticleIndex];
+                            final rightArticle =
+                                rightArticleIndex < gridArticles.length
+                                    ? gridArticles[rightArticleIndex]
+                                    : null;
+
+                            // REST OF ARTICLES: 2-column grid layout
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 16),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Left column article
+                                  Expanded(
+                                    child: _buildCompactNewsCard(
+                                      leftArticle,
+                                      gridArticles,
+                                      leftArticleIndex,
+                                      isDark,
                                     ),
                                   ),
-                                );
-                              },
+
+                                  const SizedBox(width: 16),
+
+                                  // Right column article (if exists)
+                                  Expanded(
+                                    child: rightArticle != null
+                                        ? _buildCompactNewsCard(
+                                            rightArticle,
+                                            gridArticles,
+                                            rightArticleIndex,
+                                            isDark,
+                                          )
+                                        : const SizedBox.shrink(),
+                                  ),
+                                ],
+                              ),
                             );
                           },
-                          childCount: gridArticles.length,
+                          // Calculate child count: 1 (first article) + pairs of remaining articles
+                          childCount:
+                              1 + ((gridArticles.length - 1) / 2).ceil(),
                         ),
                       ),
                     ),
@@ -338,6 +398,125 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       },
       loading: () => const SizedBox.shrink(), // Hide while checking
       error: (_, __) => const SizedBox.shrink(), // Hide on error
+    );
+  }
+
+  /// Build compact news card for 2-column grid layout
+  /// Smaller version of NewsCard for half-width display
+  /// Parameters:
+  /// - article: Article to display
+  /// - articleList: Full list for navigation
+  /// - index: Position in list
+  /// - isDark: Whether dark mode is active
+  Widget _buildCompactNewsCard(
+    Article article,
+    List<Article> articleList,
+    int index,
+    bool isDark,
+  ) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ArticleDetailScreen(
+              article: article,
+              articleList: articleList,
+              currentIndex: index,
+            ),
+          ),
+        );
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF1A1A1A) : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Article image
+            if (article.urlToImage != null && article.urlToImage!.isNotEmpty)
+              ClipRRect(
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(12)),
+                child: CachedNetworkImage(
+                  imageUrl: article.urlToImage!,
+                  height: 120,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => Container(
+                    height: 120,
+                    color: isDark
+                        ? const Color(0xFF2A2A2A)
+                        : const Color(0xFFE0E0E0),
+                  ),
+                  errorWidget: (context, url, error) => Container(
+                    height: 120,
+                    color: isDark
+                        ? const Color(0xFF2A2A2A)
+                        : const Color(0xFFE0E0E0),
+                    child: Icon(
+                      Icons.image_not_supported,
+                      color: isDark ? Colors.white24 : Colors.black26,
+                    ),
+                  ),
+                ),
+              )
+            else
+              Container(
+                height: 120,
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? const Color(0xFF2A2A2A)
+                      : const Color(0xFFE0E0E0),
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(12)),
+                ),
+                child: Center(
+                  child: Icon(
+                    Icons.image_not_supported,
+                    color: isDark ? Colors.white24 : Colors.black26,
+                  ),
+                ),
+              ),
+
+            // Article content
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Source label
+                  if (article.source != null)
+                    Text(
+                      article.source!,
+                      style: const TextStyle(
+                        color: Color(0xFFE53935),
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  const SizedBox(height: 6),
+
+                  // Title
+                  Text(
+                    article.title ?? 'No title',
+                    style: TextStyle(
+                      color: isDark ? Colors.white : Colors.black,
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      height: 1.3,
+                    ),
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
