@@ -6,7 +6,6 @@ import '../models/article.dart';
 import '../providers/device_provider.dart';
 import '../providers/theme_provider.dart';
 import '../widgets/hero_card.dart';
-import '../widgets/news_card.dart';
 import 'article_detail_screen.dart';
 
 /// Home screen - displays Editor's Pick carousel and latest news grid
@@ -88,26 +87,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           (context, index) {
                             final article = gridArticles[index];
 
-                            // ONLY FIRST ARTICLE (index 0): Full size NewsCard
+                            // ONLY FIRST ARTICLE (index 0): Featured grid card
                             if (index == 0) {
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 16),
-                                child: NewsCard(
-                                  article: article,
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => ArticleDetailScreen(
-                                          article: article,
-                                          articleList: gridArticles,
-                                          currentIndex: index,
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              );
+                              return _buildFeaturedGridCard(
+                                  article, gridArticles, index, isDark);
                             }
 
                             // ALL OTHER ARTICLES: Horizontal compact cards
@@ -472,6 +455,139 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   color: isDark ? Colors.white24 : Colors.black26,
                 ),
               ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Build featured grid card for first article in grid
+  /// Shows large image on top, content below (different from carousel overlay style)
+  /// Parameters:
+  /// - article: Article to display
+  /// - articleList: Full list for navigation
+  /// - index: Position in list
+  /// - isDark: Whether dark mode is active
+  Widget _buildFeaturedGridCard(
+    Article article,
+    List<Article> articleList,
+    int index,
+    bool isDark,
+  ) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ArticleDetailScreen(
+              article: article,
+              articleList: articleList,
+              currentIndex: index,
+            ),
+          ),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF1A1A1A) : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Large image on top
+            if (article.urlToImage != null && article.urlToImage!.isNotEmpty)
+              ClipRRect(
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(12)),
+                child: CachedNetworkImage(
+                  imageUrl: article.urlToImage!,
+                  height: 200,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => Container(
+                    height: 200,
+                    color: isDark
+                        ? const Color(0xFF2A2A2A)
+                        : const Color(0xFFE0E0E0),
+                  ),
+                  errorWidget: (context, url, error) => Container(
+                    height: 200,
+                    color: isDark
+                        ? const Color(0xFF2A2A2A)
+                        : const Color(0xFFE0E0E0),
+                    child: Icon(
+                      Icons.image_not_supported,
+                      size: 48,
+                      color: isDark ? Colors.white24 : Colors.black26,
+                    ),
+                  ),
+                ),
+              )
+            else
+              Container(
+                height: 200,
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? const Color(0xFF2A2A2A)
+                      : const Color(0xFFE0E0E0),
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(12)),
+                ),
+                child: Center(
+                  child: Icon(
+                    Icons.image_not_supported,
+                    size: 48,
+                    color: isDark ? Colors.white24 : Colors.black26,
+                  ),
+                ),
+              ),
+
+            // Content below image
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Source label
+                  if (article.source != null)
+                    Text(
+                      article.source!,
+                      style: const TextStyle(
+                        color: Color(0xFFE53935),
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  const SizedBox(height: 8),
+
+                  // Title
+                  Text(
+                    article.title ?? 'No title',
+                    style: TextStyle(
+                      color: isDark ? Colors.white : Colors.black,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      height: 1.3,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 8),
+
+                  // Author and time
+                  if (article.author != null || article.publishedAt != null)
+                    Text(
+                      '${article.author ?? ''} • 1d ago',
+                      style: TextStyle(
+                        color: isDark ? Colors.white54 : Colors.black54,
+                        fontSize: 12,
+                      ),
+                    ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
