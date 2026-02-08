@@ -5,7 +5,6 @@ import '../providers/news_provider.dart';
 import '../models/article.dart';
 import '../providers/device_provider.dart';
 import '../providers/theme_provider.dart';
-import '../widgets/hero_card.dart';
 import 'article_detail_screen.dart';
 
 /// Home screen - displays Editor's Pick carousel and latest news grid
@@ -18,19 +17,6 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-  // Controller for the Editor's Pick carousel
-  final PageController _carouselController = PageController();
-
-  // Current page index for carousel dots indicator
-  int _currentCarouselPage = 0;
-
-  @override
-  void dispose() {
-    // Clean up controller when widget is disposed
-    _carouselController.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -70,34 +56,29 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ),
               data: (articles) {
-                final featuredArticles = articles.take(3).toList();
-                final gridArticles = articles.skip(3).toList();
-
                 return CustomScrollView(
                   slivers: [
                     _buildAppBar(isDark),
-                    SliverToBoxAdapter(
-                      child: _buildEditorsPick(featuredArticles, isDark),
-                    ),
-                    // News grid - horizontal cards like "You may also like"
+
+                    // News grid - first article full size, rest horizontal
                     SliverPadding(
                       padding: const EdgeInsets.all(16),
                       sliver: SliverList(
                         delegate: SliverChildBuilderDelegate(
                           (context, index) {
-                            final article = gridArticles[index];
+                            final article = articles[index];
 
-                            // ONLY FIRST ARTICLE (index 0): Featured grid card
+                            // ONLY FIRST ARTICLE (index 0): Full size featured card
                             if (index == 0) {
                               return _buildFeaturedGridCard(
-                                  article, gridArticles, index, isDark);
+                                  article, articles, index, isDark);
                             }
 
                             // ALL OTHER ARTICLES: Horizontal compact cards
                             return _buildHorizontalNewsCard(
-                                article, gridArticles, index, isDark);
+                                article, articles, index, isDark);
                           },
-                          childCount: gridArticles.length,
+                          childCount: articles.length,
                         ),
                       ),
                     ),
@@ -186,85 +167,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         ],
       ),
-    );
-  }
-
-  /// Build the Editor's Pick section with horizontal carousel
-  Widget _buildEditorsPick(List<Article> articles, bool isDark) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Section title
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Text(
-            "Editor's Pick",
-            style: TextStyle(
-              color: const Color(0xFFE53935),
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-
-        // Carousel with featured articles
-        SizedBox(
-          height: 320,
-          child: PageView.builder(
-            controller: _carouselController,
-            onPageChanged: (index) {
-              // Update dots indicator when page changes
-              setState(() {
-                _currentCarouselPage = index;
-              });
-            },
-            itemCount: articles.length,
-            itemBuilder: (context, index) {
-              final article = articles[index];
-              return HeroCard(
-                article: article,
-                onTap: () {
-                  // Navigate to article detail on tap
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => ArticleDetailScreen(
-                        article: article,
-                        articleList: articles,
-                        currentIndex: index,
-                      ),
-                    ),
-                  );
-                },
-              );
-            },
-          ),
-        ),
-
-        // Carousel dots indicator
-        const SizedBox(height: 12),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: List.generate(
-            articles.length,
-            (index) => Container(
-              width: 8,
-              height: 8,
-              margin: const EdgeInsets.symmetric(horizontal: 4),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                // Active dot is red, inactive is gray
-                color: _currentCarouselPage == index
-                    ? const Color(0xFFE53935)
-                    : isDark
-                        ? Colors.white24
-                        : Colors.black26,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-      ],
     );
   }
 
