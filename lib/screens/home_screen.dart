@@ -60,9 +60,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   slivers: [
                     _buildAppBar(isDark),
 
+                    // "Editor's Pick" section title
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                        child: Text(
+                          "Editor's Pick",
+                          style: const TextStyle(
+                            color: Color(0xFFE53935),
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+
                     // News grid - first article full size, rest horizontal
                     SliverPadding(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
                       sliver: SliverList(
                         delegate: SliverChildBuilderDelegate(
                           (context, index) {
