@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:intl/intl.dart';
 import '../providers/news_provider.dart';
 import '../models/article.dart';
 import '../providers/device_provider.dart';
@@ -317,9 +318,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       fontWeight: FontWeight.bold,
                       height: 1.3,
                     ),
-                    maxLines: 4,
+                    maxLines: 3,
                     overflow: TextOverflow.ellipsis,
                   ),
+                  
+                  const SizedBox(height: 6),
+                  
+                  // Author and time (NEW)
+                  if (article.author != null || article.publishedAt != null)
+                    Text(
+                      '${article.author ?? 'Unknown'} • ${_formatTime(article.publishedAt ?? '')}',
+                      style: TextStyle(
+                        color: isDark ? Colors.white54 : Colors.black54,
+                        fontSize: 11,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                 ],
               ),
             ),
@@ -509,5 +524,30 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
       ),
     );
+  }
+
+  /// Format timestamp to relative time (e.g., "2h ago", "1d ago")
+  /// Parameters:
+  /// - dateString: ISO date string from API
+  String _formatTime(String dateString) {
+    if (dateString.isEmpty) return '';
+    
+    try {
+      final date = DateTime.parse(dateString);
+      final now = DateTime.now();
+      final difference = now.difference(date);
+
+      if (difference.inMinutes < 60) {
+        return '${difference.inMinutes}m ago';
+      } else if (difference.inHours < 24) {
+        return '${difference.inHours}h ago';
+      } else if (difference.inDays < 7) {
+        return '${difference.inDays}d ago';
+      } else {
+        return DateFormat('MMM d').format(date);
+      }
+    } catch (e) {
+      return '';
+    }
   }
 }
