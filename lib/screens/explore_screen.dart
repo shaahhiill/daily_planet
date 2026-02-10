@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'category_screen.dart';
 
@@ -108,6 +107,12 @@ class ExploreScreen extends StatelessWidget {
     );
   }
 
+  /// Build a single category card
+  /// Parameters:
+  /// - name: Display name (e.g., "Politics")
+  /// - icon: Icon to show on card
+  /// - categoryId: API category string (e.g., "politics")
+  /// - isDark: Whether dark mode is active
   Widget _buildCategoryCard(
     BuildContext context, {
     required String name,
@@ -116,83 +121,69 @@ class ExploreScreen extends StatelessWidget {
     required bool isDark,
   }) {
     return GestureDetector(
+      // Navigate to category-specific news screen when tapped
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (_) => CategoryScreen(
-              category: categoryId,
-              categoryName: name,
+              category: categoryId, // Pass category ID to fetch correct news
+              categoryName: name, // Pass display name for screen title
             ),
           ),
         );
       },
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: BackdropFilter(
-          // Glass blur effect
-          filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
-          child: Container(
-            // Glass morphism styling
-            decoration: BoxDecoration(
-              // Semi-transparent background
-              color: isDark
-                  ? Colors.white.withOpacity(0.05)
-                  : Colors.black.withOpacity(0.02),
-              borderRadius: BorderRadius.circular(16),
-              // Subtle border for glass effect
-              border: Border.all(
-                color: isDark
-                    ? Colors.white.withOpacity(0.1)
-                    : Colors.black.withOpacity(0.05),
-                width: 1,
+      child: Container(
+        // Card styling
+        decoration: BoxDecoration(
+          // Background color based on theme
+          color: isDark ? const Color(0xFF1A1A1A) : Colors.white,
+          // Rounded corners
+          borderRadius: BorderRadius.circular(16),
+          // Subtle shadow for depth (only visible in light mode)
+          boxShadow: isDark
+              ? []
+              : [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Category icon in a circular background
+            Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                // Red circular background for icon
+                color: const Color(0xFFE53935).withOpacity(0.1),
+                shape: BoxShape.circle,
               ),
-              // Subtle shadow
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+              child: Icon(
+                icon,
+                size: 30,
+                // Red icon color
+                color: const Color(0xFFE53935),
+              ),
             ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Category icon with glass background
-                Container(
-                  width: 60,
-                  height: 60,
-                  decoration: BoxDecoration(
-                    // Red transparent background for icon
-                    color: const Color(0xFFE53935).withOpacity(0.15),
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: const Color(0xFFE53935).withOpacity(0.3),
-                      width: 1.5,
-                    ),
-                  ),
-                  child: Icon(
-                    icon,
-                    size: 30,
-                    color: const Color(0xFFE53935),
-                  ),
-                ),
 
-                const SizedBox(height: 12),
+            const SizedBox(height: 12),
 
-                // Category name
-                Text(
-                  name,
-                  style: TextStyle(
-                    color: isDark ? Colors.white : Colors.black,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
+            // Category name text
+            Text(
+              name,
+              style: TextStyle(
+                // Text color based on theme
+                color: isDark ? Colors.white : Colors.black,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );
