@@ -524,42 +524,41 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
         // Row of social media icons
         Row(
           children: [
-            // WhatsApp share button (using chat icon)
+            // WhatsApp share button
             _buildShareButton(
-              icon: Icons.chat,
-              color: const Color(0xFF25D366), // WhatsApp green
+              imagePath: 'assets/images/social/whatsapp.png',
+              color: const Color(0xFF25D366),
               onTap: () => _shareToWhatsApp(),
               isDark: isDark,
             ),
 
             const SizedBox(width: 12),
 
-            // Facebook share button (using public icon)
+            // Instagram share button
             _buildShareButton(
-              icon: Icons.public,
-              color: const Color(0xFF1877F2), // Facebook blue
-              onTap: () => _shareToFacebook(),
+              imagePath: 'assets/images/social/instagram.png',
+              color: const Color(0xFFE4405F),
+              onTap: () => _shareToInstagram(),
               isDark: isDark,
             ),
 
             const SizedBox(width: 12),
 
-            // Twitter/X share button (using X text label)
+            // Twitter/X share button
             _buildShareButton(
-              icon: Icons.close, // Placeholder icon, will show X label instead
+              imagePath: 'assets/images/social/twitter.png',
               color: Colors.black,
               onTap: () => _shareToTwitter(),
               isDark: isDark,
-              label: 'X', // Show X label instead of icon
             ),
 
             const SizedBox(width: 12),
 
-            // Instagram share button (using camera icon)
+            // LinkedIn share button
             _buildShareButton(
-              icon: Icons.camera_alt,
-              color: const Color(0xFFE4405F), // Instagram pink
-              onTap: () => _shareToInstagram(),
+              imagePath: 'assets/images/social/linkedin.png',
+              color: const Color(0xFF0A66C2),
+              onTap: () => _shareToLinkedIn(),
               isDark: isDark,
             ),
           ],
@@ -570,17 +569,15 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
 
   /// Build individual social media share button
   /// Parameters:
-  /// - icon: Icon to display
+  /// - imagePath: Path to the social media logo image
   /// - color: Brand color for the button
   /// - onTap: Callback when button is tapped
   /// - isDark: Whether dark mode is active
-  /// - label: Optional text label instead of icon
   Widget _buildShareButton({
-    required IconData icon,
+    required String imagePath,
     required Color color,
     required VoidCallback onTap,
     required bool isDark,
-    String? label,
   }) {
     return GestureDetector(
       onTap: onTap,
@@ -596,22 +593,12 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
           ),
         ),
         child: Center(
-          child: label != null
-              // Show text label (for X/Twitter)
-              ? Text(
-                  label,
-                  style: TextStyle(
-                    color: color,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                )
-              // Show icon
-              : Icon(
-                  icon,
-                  color: color,
-                  size: 28,
-                ),
+          child: Image.asset(
+            imagePath,
+            width: 32,
+            height: 32,
+            fit: BoxFit.contain,
+          ),
         ),
       ),
     );
@@ -628,13 +615,13 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
     }
   }
 
-  /// Share article to Facebook
-  /// Opens Facebook with URL to share
-  void _shareToFacebook() async {
+  /// Share article to LinkedIn
+  /// Opens LinkedIn with pre-filled post containing article URL
+  void _shareToLinkedIn() async {
     if (currentArticle.url == null) return;
 
     final url = Uri.parse(
-        'https://www.facebook.com/sharer/sharer.php?u=${Uri.encodeComponent(currentArticle.url!)}');
+        'https://www.linkedin.com/sharing/share-offsite/?url=${Uri.encodeComponent(currentArticle.url!)}');
 
     if (await canLaunchUrl(url)) {
       await launchUrl(url, mode: LaunchMode.externalApplication);
@@ -826,9 +813,23 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
                       fontWeight: FontWeight.w600,
                       height: 1.3,
                     ),
-                    maxLines: 3,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
+
+                  const SizedBox(height: 4),
+
+                  // Author and time
+                  if (article.author != null || article.publishedAt != null)
+                    Text(
+                      '${article.author ?? 'Unknown'} • ${_formatTime(article.publishedAt ?? '')}',
+                      style: TextStyle(
+                        color: isDark ? Colors.white54 : Colors.black54,
+                        fontSize: 10,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                 ],
               ),
             ),
@@ -886,6 +887,29 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
         ),
       ),
     );
+  }
+
+  /// Format timestamp to relative time
+  String _formatTime(String dateString) {
+    if (dateString.isEmpty) return '';
+
+    try {
+      final date = DateTime.parse(dateString);
+      final now = DateTime.now();
+      final difference = now.difference(date);
+
+      if (difference.inMinutes < 60) {
+        return '${difference.inMinutes}m ago';
+      } else if (difference.inHours < 24) {
+        return '${difference.inHours}h ago';
+      } else if (difference.inDays < 7) {
+        return '${difference.inDays}d ago';
+      } else {
+        return DateFormat('MMM d').format(date);
+      }
+    } catch (e) {
+      return '';
+    }
   }
 
   /// Format the published date to readable format
