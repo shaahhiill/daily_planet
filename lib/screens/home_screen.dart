@@ -70,6 +70,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
                     // Step 2: Fetch fresh news from API and wait for completion
                     await ref.read(topHeadlinesProvider(null).future);
+
+                    // Step 3: Show confirmation to user
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('News refreshed successfully'),
+                          duration: Duration(seconds: 2),
+                          backgroundColor: Color(0xFFE53935),
+                        ),
+                      );
+                    }
                   },
 
                   child: CustomScrollView(
