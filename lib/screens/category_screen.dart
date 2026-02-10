@@ -126,7 +126,7 @@ class CategoryScreen extends ConsumerWidget {
                                 style: TextStyle(
                                   // Red section header
                                   color: const Color(0xFFE53935),
-                                  fontSize: 18,
+                                  fontSize: 25,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
