@@ -57,48 +57,64 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ),
               data: (articles) {
-                return CustomScrollView(
-                  slivers: [
-                    _buildAppBar(isDark),
+                // PULL-TO-REFRESH FUNCTIONALITY START
+                // When user drags screen down, it triggers onRefresh callback
+                return RefreshIndicator(
+                  // Red color for refresh spinner (matches app theme)
+                  color: const Color(0xFFE53935),
 
-                    // "Editor's Pick" section title
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                        child: Text(
-                          "Editor's Pick",
-                          style: const TextStyle(
-                            color: Color(0xFFE53935),
-                            fontSize: 25,
-                            fontWeight: FontWeight.bold,
+                  // onRefresh: Called when user pulls down the screen
+                  onRefresh: () async {
+                    // Step 1: Clear cached news data
+                    ref.invalidate(topHeadlinesProvider(null));
+
+                    // Step 2: Fetch fresh news from API and wait for completion
+                    await ref.read(topHeadlinesProvider(null).future);
+                  },
+
+                  child: CustomScrollView(
+                    slivers: [
+                      _buildAppBar(isDark),
+
+                      // "Editor's Pick" section title
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                          child: Text(
+                            "Editor's Pick",
+                            style: const TextStyle(
+                              color: Color(0xFFE53935),
+                              fontSize: 25,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),
-                    ),
 
-                    // News grid - first article full size, rest horizontal
-                    SliverPadding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      sliver: SliverList(
-                        delegate: SliverChildBuilderDelegate(
-                          (context, index) {
-                            final article = articles[index];
+                      // News grid - first article full size, rest horizontal
+                      SliverPadding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        sliver: SliverList(
+                          delegate: SliverChildBuilderDelegate(
+                            (context, index) {
+                              final article = articles[index];
 
-                            // ONLY FIRST ARTICLE (index 0): Full size featured card
-                            if (index == 0) {
-                              return _buildFeaturedGridCard(
+                              // ONLY FIRST ARTICLE (index 0): Full size featured card
+                              if (index == 0) {
+                                return _buildFeaturedGridCard(
+                                    article, articles, index, isDark);
+                              }
+
+                              // ALL OTHER ARTICLES: Horizontal compact cards
+                              return _buildHorizontalNewsCard(
                                   article, articles, index, isDark);
-                            }
-
-                            // ALL OTHER ARTICLES: Horizontal compact cards
-                            return _buildHorizontalNewsCard(
-                                article, articles, index, isDark);
-                          },
-                          childCount: articles.length,
+                            },
+                            childCount: articles.length,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 );
               },
             ),
