@@ -57,32 +57,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ),
               data: (articles) {
-                // PULL-TO-REFRESH FUNCTIONALITY START
-                // When user drags screen down, it triggers onRefresh callback
                 return RefreshIndicator(
-                  // Red color for refresh spinner (matches app theme)
                   color: const Color(0xFFE53935),
-
-                  // onRefresh: Called when user pulls down the screen
                   onRefresh: () async {
-                    // Step 1: Clear cached news data
+                    // Invalidate the provider to trigger a refresh
                     ref.invalidate(topHeadlinesProvider(null));
-
-                    // Step 2: Fetch fresh news from API and wait for completion
+                    // Wait for the new data to load
                     await ref.read(topHeadlinesProvider(null).future);
-
-                    // Step 3: Show confirmation to user
-                    if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('News refreshed successfully'),
-                          duration: Duration(seconds: 2),
-                          backgroundColor: Color(0xFFE53935),
-                        ),
-                      );
-                    }
                   },
-
                   child: CustomScrollView(
                     slivers: [
                       _buildAppBar(isDark),
