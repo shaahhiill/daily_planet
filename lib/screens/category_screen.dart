@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:intl/intl.dart';
+import '../models/article.dart';
 import '../providers/news_provider.dart';
-import '../widgets/news_card.dart';
 import '../widgets/hero_card.dart';
 import 'article_detail_screen.dart';
 
@@ -153,35 +155,18 @@ class CategoryScreen extends ConsumerWidget {
                         ),
                       ),
 
-                      // List of remaining articles (scrollable)
+                      // List of remaining articles in half-format (text left, image right)
                       SliverPadding(
                         padding: const EdgeInsets.all(16),
                         sliver: SliverList(
                           delegate: SliverChildBuilderDelegate(
                             (context, index) {
-                              // Get current article from list
                               final article = listArticles[index];
 
-                              // Return a news card for each article
-                              return NewsCard(
-                                article: article,
-                                onTap: () {
-                                  // Navigate to article detail when tapped
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => ArticleDetailScreen(
-                                        article: article,
-                                        articleList: articles,
-                                        currentIndex: index +
-                                            1, // +1 because first is featured
-                                      ),
-                                    ),
-                                  );
-                                },
-                              );
+                              // Use same horizontal card as home screen
+                              return _buildHorizontalNewsCard(context, article,
+                                  articles, index + 1, isDark);
                             },
-                            // Number of cards to build
                             childCount: listArticles.length,
                           ),
                         ),
@@ -243,5 +228,134 @@ class CategoryScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  /// Build horizontal compact card (same as home screen)
+  Widget _buildHorizontalNewsCard(BuildContext context, Article article,
+      List<Article> articleList, int index, bool isDark) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ArticleDetailScreen(
+              article: article,
+              articleList: articleList,
+              currentIndex: index,
+            ),
+          ),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF1A1A1A) : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Text on LEFT
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (article.source != null)
+                    Text(
+                      article.source!,
+                      style: const TextStyle(
+                        color: Color(0xFFE53935),
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  const SizedBox(height: 6),
+                  Text(
+                    article.title ?? 'No title',
+                    style: TextStyle(
+                      color: isDark ? Colors.white : Colors.black,
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      height: 1.3,
+                    ),
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 6),
+                  if (article.author != null || article.publishedAt != null)
+                    Text(
+                      '${article.author ?? 'Unknown'} • ${_formatTime(article.publishedAt ?? '')}',
+                      style: TextStyle(
+                        color: isDark ? Colors.white54 : Colors.black54,
+                        fontSize: 11,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
+            // Image on RIGHT
+            if (article.urlToImage != null && article.urlToImage!.isNotEmpty)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: CachedNetworkImage(
+                  imageUrl: article.urlToImage!,
+                  width: 100,
+                  height: 100,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => Container(
+                    width: 100,
+                    height: 100,
+                    color: isDark
+                        ? const Color(0xFF2A2A2A)
+                        : const Color(0xFFE0E0E0),
+                  ),
+                  errorWidget: (context, url, error) => Container(
+                    width: 100,
+                    height: 100,
+                    color: isDark
+                        ? const Color(0xFF2A2A2A)
+                        : const Color(0xFFE0E0E0),
+                    child: Icon(Icons.image_not_supported,
+                        size: 24,
+                        color: isDark ? Colors.white24 : Colors.black26),
+                  ),
+                ),
+              )
+            else
+              Container(
+                width: 100,
+                height: 100,
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? const Color(0xFF2A2A2A)
+                      : const Color(0xFFE0E0E0),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(Icons.article,
+                    size: 32, color: isDark ? Colors.white24 : Colors.black26),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _formatTime(String dateString) {
+    if (dateString.isEmpty) return '';
+    try {
+      final date = DateTime.parse(dateString);
+      final now = DateTime.now();
+      final difference = now.difference(date);
+      if (difference.inMinutes < 60) return '${difference.inMinutes}m ago';
+      if (difference.inHours < 24) return '${difference.inHours}h ago';
+      if (difference.inDays < 7) return '${difference.inDays}d ago';
+      return DateFormat('MMM d').format(date);
+    } catch (e) {
+      return '';
+    }
   }
 }
