@@ -1,9 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
-// ============================================================================
 // NETWORK CONNECTIVITY PROVIDER
-// ============================================================================
 /// Provider that checks if device is currently connected to internet
 /// Returns true if connected via wifi, mobile, or ethernet
 /// Returns false if no connection

@@ -124,7 +124,7 @@ class CategoryScreen extends ConsumerWidget {
                                 vertical: 8,
                               ),
                               child: Text(
-                                'Featured',
+                                'Top Stories',
                                 style: TextStyle(
                                   // Red section header
                                   color: const Color(0xFFE53935),
