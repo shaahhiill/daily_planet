@@ -15,8 +15,7 @@ dependencies:
   riverpod: ^2.6.1
   http: ^1.2.2
   shared_preferences: ^2.3.3
-  geolocator: ^13.0.2
-  battery_plus: ^6.0.5
+
   connectivity_plus: ^6.0.5
   cached_network_image: ^3.4.1
   flutter_dotenv: ^5.2.1
