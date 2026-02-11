@@ -6,6 +6,7 @@ import '../providers/news_provider.dart';
 import '../models/article.dart';
 import '../providers/device_provider.dart';
 import '../providers/theme_provider.dart';
+import '../providers/auth_provider.dart';
 import 'article_detail_screen.dart';
 
 /// Home screen - displays Editor's Pick carousel and latest news grid
@@ -188,6 +189,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   },
                 );
               },
+            ),
+          ),
+
+          const SizedBox(width: 8),
+
+          // Profile/Settings icon button
+          Container(
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF1A1A1A) : Colors.white,
+              shape: BoxShape.circle,
+            ),
+            child: IconButton(
+              icon: Icon(
+                Icons.person_outline,
+                color: isDark ? Colors.white : Colors.black,
+                size: 22,
+              ),
+              onPressed: () => _showProfileSheet(context, isDark),
             ),
           ),
         ],
@@ -558,5 +577,175 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     } catch (e) {
       return '';
     }
+  }
+
+  /// Show profile bottom sheet with user info and logout
+  /// Displays user email, theme toggle, and logout button
+  /// Parameters:
+  /// - context: BuildContext for showing bottom sheet
+  /// - isDark: Whether dark mode is active
+  void _showProfileSheet(BuildContext context, bool isDark) {
+    // Get current user from Firebase
+    final user = ref.read(authStateProvider).value;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF1A1A1A) : Colors.white,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Drag handle indicator
+            Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 20),
+              decoration: BoxDecoration(
+                color: isDark ? Colors.white24 : Colors.black26,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+
+            // Profile icon
+            Container(
+              width: 70,
+              height: 70,
+              decoration: BoxDecoration(
+                color: const Color(0xFFE53935).withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.person,
+                size: 40,
+                color: Color(0xFFE53935),
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // User email
+            Text(
+              user?.email ?? 'No email',
+              style: TextStyle(
+                color: isDark ? Colors.white : Colors.black,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            // Divider
+            Divider(color: isDark ? Colors.white12 : Colors.black12),
+
+            const SizedBox(height: 16),
+
+            // Theme toggle option
+            Consumer(
+              builder: (context, ref, _) {
+                final themeMode = ref.watch(themeModeProvider);
+                final isLightMode = themeMode == ThemeMode.light;
+
+                return ListTile(
+                  leading: Icon(
+                    isLightMode ? Icons.dark_mode : Icons.light_mode,
+                    color: const Color(0xFFE53935),
+                  ),
+                  title: Text(
+                    'Theme',
+                    style: TextStyle(
+                      color: isDark ? Colors.white : Colors.black,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  trailing: Text(
+                    isLightMode ? 'Light' : 'Dark',
+                    style: TextStyle(
+                      color: isDark ? Colors.white54 : Colors.black54,
+                    ),
+                  ),
+                  onTap: () {
+                    ref.read(themeModeProvider.notifier).toggleTheme();
+                  },
+                );
+              },
+            ),
+
+            const SizedBox(height: 8),
+
+            // Logout button
+            ListTile(
+              leading: const Icon(
+                Icons.logout,
+                color: Color(0xFFE53935),
+              ),
+              title: Text(
+                'Logout',
+                style: TextStyle(
+                  color: isDark ? Colors.white : Colors.black,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              onTap: () async {
+                // Close bottom sheet first
+                Navigator.pop(context);
+
+                // Show confirmation dialog
+                final shouldLogout = await showDialog<bool>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    backgroundColor:
+                        isDark ? const Color(0xFF1A1A1A) : Colors.white,
+                    title: Text(
+                      'Logout',
+                      style: TextStyle(
+                        color: isDark ? Colors.white : Colors.black,
+                      ),
+                    ),
+                    content: Text(
+                      'Are you sure you want to logout?',
+                      style: TextStyle(
+                        color: isDark ? Colors.white70 : Colors.black87,
+                      ),
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, false),
+                        child: Text(
+                          'Cancel',
+                          style: TextStyle(
+                            color: isDark ? Colors.white54 : Colors.black54,
+                          ),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, true),
+                        child: const Text(
+                          'Logout',
+                          style: TextStyle(color: Color(0xFFE53935)),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+
+                // If user confirmed, logout
+                if (shouldLogout == true) {
+                  final authService = ref.read(authServiceProvider);
+                  await authService.logout();
+                }
+              },
+            ),
+
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
   }
 }
