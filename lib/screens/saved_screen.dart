@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:intl/intl.dart';
 import '../providers/saved_provider.dart';
-import '../models/article.dart';
-import '../widgets/news_card.dart';
 import 'article_detail_screen.dart';
 
 /// Saved screen - displays articles that user has bookmarked
@@ -36,8 +36,8 @@ class SavedScreen extends ConsumerWidget {
               child: savedArticles.isEmpty
                   // EMPTY STATE: No saved articles yet
                   ? _buildEmptyState(isDark)
-                  // ARTICLES LIST: Show all saved articles
-                  : _buildArticlesList(context, savedArticles),
+                  // ARTICLES LIST: Show all saved articles in horizontal format
+                  : _buildArticlesList(context, savedArticles, isDark),
             ),
           ],
         ),
@@ -131,12 +131,13 @@ class SavedScreen extends ConsumerWidget {
     );
   }
 
-  /// Build the scrollable list of saved articles
-  /// Each article is a NewsCard that navigates to detail on tap
+  /// Build the scrollable list of saved articles in horizontal card format
+  /// Each article shows: image (right), text (left), author, time
   /// Parameters:
   /// - context: BuildContext for navigation
   /// - articles: List of saved Article objects
-  Widget _buildArticlesList(BuildContext context, List<Article> articles) {
+  /// - isDark: Whether dark mode is active
+  Widget _buildArticlesList(BuildContext context, List articles, bool isDark) {
     return ListView.builder(
       // Padding around the entire list
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -146,25 +147,170 @@ class SavedScreen extends ConsumerWidget {
         // Get current article from list
         final article = articles[index];
 
-        // Return a news card for each article
-        return NewsCard(
-          article: article,
-          onTap: () {
-            // Navigate to article detail screen when tapped
-            // User can unsave the article from there
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => ArticleDetailScreen(
-                  article: article,
-                  articleList: articles,
-                  currentIndex: index,
-                ),
-              ),
-            );
-          },
-        );
+        // Return horizontal card for each article (same style as home screen)
+        return _buildHorizontalCard(context, article, articles, index, isDark);
       },
     );
+  }
+
+  /// Build horizontal article card (text left, image right, author/time below)
+  /// Same style as home screen for consistency
+  /// Parameters:
+  /// - context: BuildContext for navigation
+  /// - article: Article to display
+  /// - articles: Full list for navigation
+  /// - index: Position in list
+  /// - isDark: Whether dark mode is active
+  Widget _buildHorizontalCard(
+      BuildContext context, article, List articles, int index, bool isDark) {
+    return GestureDetector(
+      onTap: () {
+        // Navigate to article detail screen when tapped
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ArticleDetailScreen(
+              article: article,
+              articleList: articles,
+              currentIndex: index,
+            ),
+          ),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF1A1A1A) : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Article title and source on LEFT
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Source label in red
+                  if (article.source != null)
+                    Text(
+                      article.source!,
+                      style: const TextStyle(
+                        color: Color(0xFFE53935),
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+
+                  const SizedBox(height: 6),
+
+                  // Article title
+                  Text(
+                    article.title ?? 'No title',
+                    style: TextStyle(
+                      color: isDark ? Colors.white : Colors.black,
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      height: 1.3,
+                    ),
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+
+                  const SizedBox(height: 6),
+
+                  // Author and time
+                  if (article.author != null || article.publishedAt != null)
+                    Text(
+                      '${article.author ?? 'Unknown'} • ${_formatTime(article.publishedAt ?? '')}',
+                      style: TextStyle(
+                        color: isDark ? Colors.white54 : Colors.black54,
+                        fontSize: 11,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                ],
+              ),
+            ),
+
+            const SizedBox(width: 12),
+
+            // Article thumbnail on RIGHT
+            if (article.urlToImage != null && article.urlToImage!.isNotEmpty)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: CachedNetworkImage(
+                  imageUrl: article.urlToImage!,
+                  width: 100,
+                  height: 100,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => Container(
+                    width: 100,
+                    height: 100,
+                    color: isDark
+                        ? const Color(0xFF2A2A2A)
+                        : const Color(0xFFE0E0E0),
+                  ),
+                  errorWidget: (context, url, error) => Container(
+                    width: 100,
+                    height: 100,
+                    color: isDark
+                        ? const Color(0xFF2A2A2A)
+                        : const Color(0xFFE0E0E0),
+                    child: Icon(
+                      Icons.image_not_supported,
+                      size: 24,
+                      color: isDark ? Colors.white24 : Colors.black26,
+                    ),
+                  ),
+                ),
+              )
+            else
+              Container(
+                width: 100,
+                height: 100,
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? const Color(0xFF2A2A2A)
+                      : const Color(0xFFE0E0E0),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  Icons.article,
+                  size: 32,
+                  color: isDark ? Colors.white24 : Colors.black26,
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Format timestamp to relative time (e.g., "2h ago", "1d ago")
+  /// Parameters:
+  /// - dateString: ISO date string from API
+  String _formatTime(String dateString) {
+    if (dateString.isEmpty) return '';
+
+    try {
+      final date = DateTime.parse(dateString);
+      final now = DateTime.now();
+      final difference = now.difference(date);
+
+      if (difference.inMinutes < 60) {
+        return '${difference.inMinutes}m ago';
+      } else if (difference.inHours < 24) {
+        return '${difference.inHours}h ago';
+      } else if (difference.inDays < 7) {
+        return '${difference.inDays}d ago';
+      } else {
+        return DateFormat('MMM d').format(date);
+      }
+    } catch (e) {
+      return '';
+    }
   }
 }
