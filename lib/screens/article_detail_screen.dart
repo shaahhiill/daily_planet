@@ -527,7 +527,7 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
             // WhatsApp share button
             _buildShareButton(
               imagePath: 'assets/images/social/whatsapp.png',
-              color: const Color(0xFF25D366),
+              color: Colors.black,
               onTap: () => _shareToWhatsApp(),
               isDark: isDark,
             ),
@@ -537,7 +537,7 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
             // Instagram share button
             _buildShareButton(
               imagePath: 'assets/images/social/instagram.png',
-              color: const Color(0xFFE4405F),
+              color: Colors.black,
               onTap: () => _shareToInstagram(),
               isDark: isDark,
             ),
@@ -547,7 +547,7 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
             // Twitter share button
             _buildShareButton(
               imagePath: 'assets/images/social/twitter.png',
-              color: const Color(0xFFE4405F),
+              color: Colors.black,
               onTap: () => _shareToTwitter(),
               isDark: isDark,
             ),
@@ -557,7 +557,7 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
             // LinkedIn share button
             _buildShareButton(
               imagePath: 'assets/images/social/linkedin.png',
-              color: const Color(0xFF0A66C2),
+              color: Colors.black,
               onTap: () => _shareToLinkedIn(),
               isDark: isDark,
             ),
