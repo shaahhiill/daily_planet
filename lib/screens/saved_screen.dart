@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
 import '../providers/saved_provider.dart';
+import '../models/article.dart';
 import 'article_detail_screen.dart';
 
 /// Saved screen - displays articles that user has bookmarked
@@ -171,7 +172,7 @@ class SavedScreen extends ConsumerWidget {
           MaterialPageRoute(
             builder: (_) => ArticleDetailScreen(
               article: article,
-              articleList: article,
+              articleList: articles.cast<Article>(),
               currentIndex: index,
             ),
           ),
