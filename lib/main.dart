@@ -52,8 +52,6 @@ class DailyPlanetApp extends ConsumerWidget {
         onSecondary: Colors.white,
         error: Colors.red,
         onError: Colors.white,
-        background: isDark ? const Color(0xFF0A0A0A) : const Color(0xFFF5F5F5),
-        onBackground: isDark ? Colors.white : Colors.black,
         surface: isDark ? const Color(0xFF1A1A1A) : Colors.white,
         onSurface: isDark ? Colors.white : Colors.black,
       ),
