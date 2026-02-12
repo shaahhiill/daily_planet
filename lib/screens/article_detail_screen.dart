@@ -544,6 +544,16 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
 
             const SizedBox(width: 12),
 
+            // Twitter share button
+            _buildShareButton(
+              imagePath: 'assets/images/social/twitter.png',
+              color: const Color(0xFFE4405F),
+              onTap: () => _shareToTwitter(),
+              isDark: isDark,
+            ),
+
+            const SizedBox(width: 12),
+
             // LinkedIn share button
             _buildShareButton(
               imagePath: 'assets/images/social/linkedin.png',
