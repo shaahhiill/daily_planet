@@ -161,8 +161,8 @@ class SavedScreen extends ConsumerWidget {
   /// - articles: Full list for navigation
   /// - index: Position in list
   /// - isDark: Whether dark mode is active
- Widget _buildHorizontalCard(
-      BuildContext context, dynamic article, List<dynamic> articles, int index, bool isDark) {
+  Widget _buildHorizontalCard(BuildContext context, dynamic article,
+      List<dynamic> articles, int index, bool isDark) {
     return GestureDetector(
       onTap: () {
         // Navigate to article detail screen when tapped

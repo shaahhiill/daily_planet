@@ -645,39 +645,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
             const SizedBox(height: 16),
 
-            // Theme toggle option
-            Consumer(
-              builder: (context, ref, _) {
-                final themeMode = ref.watch(themeModeProvider);
-                final isLightMode = themeMode == ThemeMode.light;
-
-                return ListTile(
-                  leading: Icon(
-                    isLightMode ? Icons.dark_mode : Icons.light_mode,
-                    color: const Color(0xFFE53935),
-                  ),
-                  title: Text(
-                    'Theme',
-                    style: TextStyle(
-                      color: isDark ? Colors.white : Colors.black,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  trailing: Text(
-                    isLightMode ? 'Light' : 'Dark',
-                    style: TextStyle(
-                      color: isDark ? Colors.white54 : Colors.black54,
-                    ),
-                  ),
-                  onTap: () {
-                    ref.read(themeModeProvider.notifier).toggleTheme();
-                  },
-                );
-              },
-            ),
-
-            const SizedBox(height: 8),
-
             // Logout button
             ListTile(
               leading: const Icon(
