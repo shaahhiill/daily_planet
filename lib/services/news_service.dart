@@ -1,11 +1,12 @@
 import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import '../models/article.dart';
 
 /// Service for fetching news articles from NewsAPI
 class NewsService {
-  final String _apiKey = '64db3c3bed724b6289817e01f987217e'; // NewsAPI key
+  final String _apikey = dotenv.env['NEWS_API_KEY'] ?? ''; // NewsAPI key
   final String _baseUrl = 'https://newsapi.org/v2'; // NewsAPI base URL
 
   /// Fetch top headlines, optionally filtered by category
@@ -14,8 +15,8 @@ class NewsService {
     try {
       // Build URL with optional category filter
       final url = category != null
-          ? '$_baseUrl/top-headlines?country=us&category=$category&apiKey=$_apiKey'
-          : '$_baseUrl/top-headlines?country=us&apiKey=$_apiKey';
+          ? '$_baseUrl/top-headlines?country=us&category=$category&apiKey=$_apikey'
+          : '$_baseUrl/top-headlines?country=us&apiKey=$_apikey';
 
       final response = await http.get(Uri.parse(url));
 
@@ -40,7 +41,7 @@ class NewsService {
   Future<List<Article>> searchNews(String query) async {
     try {
       final url =
-          '$_baseUrl/everything?q=$query&apiKey=$_apiKey&sortBy=publishedAt';
+          '$_baseUrl/everything?q=$query&apiKey=$_apikey&sortBy=publishedAt';
       final response = await http.get(Uri.parse(url));
 
       if (response.statusCode == 200) {

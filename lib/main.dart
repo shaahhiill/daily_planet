@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-// import 'package:flutter_dotenv/flutter_dotenv.dart'; // Commented out - not using .env file
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -13,8 +13,8 @@ void main() async {
   // Required for async operations before runApp
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Load environment variables (currently commented out)
-  // await dotenv.load();
+  // Load environment variables
+  await dotenv.load(fileName: '.env');
 
   // Initialize Firebase with platform-specific configuration
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
