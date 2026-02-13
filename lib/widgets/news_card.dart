@@ -3,11 +3,11 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
 import '../models/article.dart';
 
-/// Reusable widget for displaying a single news article card
-/// Used in home screen, explore screen, search results, and saved articles
+/// Reusable news article card widget
+/// Used in search results, explore screen, and other list views
 class NewsCard extends StatelessWidget {
-  final Article article;
-  final VoidCallback onTap;
+  final Article article; // Article data to display
+  final VoidCallback onTap; // Callback when card is tapped
 
   const NewsCard({
     super.key,
@@ -17,41 +17,44 @@ class NewsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark =
+        Theme.of(context).brightness == Brightness.dark; // Check current theme
 
     return GestureDetector(
-      onTap: onTap,
+      onTap: onTap, // Navigate to article detail on tap
       child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
+        margin: const EdgeInsets.only(bottom: 16), // Space between cards
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF1A1A1A) : Colors.white,
-          borderRadius: BorderRadius.circular(12),
+          color: isDark
+              ? const Color(0xFF1A1A1A)
+              : Colors.white, // Card background
+          borderRadius: BorderRadius.circular(12), // Rounded corners
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Article image with error handling
+            // Article image at the top
             _buildImage(isDark),
 
-            // Article content (source, title, time)
+            // Article text content below image
             Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Source label
+                  // Source label (e.g., "BBC News", "CNN")
                   if (article.source != null)
                     Text(
                       article.source!,
                       style: TextStyle(
-                        color: const Color(0xFFE53935),
+                        color: const Color(0xFFE53935), // Red theme color
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   const SizedBox(height: 8),
 
-                  // Article title
+                  // Article title - main headline
                   Text(
                     article.title ?? 'No title',
                     style: TextStyle(
@@ -59,15 +62,16 @@ class NewsCard extends StatelessWidget {
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+                    maxLines: 2, // Limit to 2 lines
+                    overflow: TextOverflow.ellipsis, // Show ... if too long
                   ),
                   const SizedBox(height: 8),
 
-                  // Time and author info
+                  // Time and author metadata
                   Row(
                     children: [
                       if (article.publishedAt != null) ...[
+                        // Show relative time (e.g., "2h ago")
                         Text(
                           _formatTime(article.publishedAt!),
                           style: TextStyle(
@@ -76,6 +80,7 @@ class NewsCard extends StatelessWidget {
                           ),
                         ),
                         if (article.author != null) ...[
+                          // Separator between time and author
                           Text(
                             ' • ',
                             style: TextStyle(
@@ -83,6 +88,7 @@ class NewsCard extends StatelessWidget {
                               fontSize: 12,
                             ),
                           ),
+                          // Author name
                           Expanded(
                             child: Text(
                               article.author!,
@@ -107,10 +113,11 @@ class NewsCard extends StatelessWidget {
     );
   }
 
-  /// Build the article image with cached network loading and fallback
+  // Build article image with caching and error handling
   Widget _buildImage(bool isDark) {
+    // Check if article has an image URL
     if (article.urlToImage == null || article.urlToImage!.isEmpty) {
-      // Fallback placeholder when no image is available
+      // Show placeholder when no image is available
       return Container(
         height: 200,
         decoration: BoxDecoration(
@@ -127,13 +134,15 @@ class NewsCard extends StatelessWidget {
       );
     }
 
+    // Load image from network with caching
     return ClipRRect(
       borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
       child: CachedNetworkImage(
         imageUrl: article.urlToImage!,
         height: 200,
         width: double.infinity,
-        fit: BoxFit.cover,
+        fit: BoxFit.cover, // Fill width, crop height
+        // Show loading spinner while image loads
         placeholder: (context, url) => Container(
           height: 200,
           color: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE0E0E0),
@@ -141,6 +150,7 @@ class NewsCard extends StatelessWidget {
             child: CircularProgressIndicator(color: Color(0xFFE53935)),
           ),
         ),
+        // Show error icon if image fails to load
         errorWidget: (context, url, error) => Container(
           height: 200,
           color: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE0E0E0),
@@ -156,24 +166,31 @@ class NewsCard extends StatelessWidget {
     );
   }
 
-  /// Format the published time to relative format (e.g., "14m ago", "2h ago")
+  // Format timestamp to relative time (e.g., "2h ago", "3d ago")
   String _formatTime(String dateString) {
     try {
       final date = DateTime.parse(dateString);
       final now = DateTime.now();
       final difference = now.difference(date);
 
+      // Less than 1 hour: show minutes
       if (difference.inMinutes < 60) {
         return '${difference.inMinutes}m ago';
-      } else if (difference.inHours < 24) {
+      }
+      // Less than 1 day: show hours
+      else if (difference.inHours < 24) {
         return '${difference.inHours}h ago';
-      } else if (difference.inDays < 7) {
+      }
+      // Less than 1 week: show days
+      else if (difference.inDays < 7) {
         return '${difference.inDays}d ago';
-      } else {
+      }
+      // Older: show date (e.g., "Jan 15")
+      else {
         return DateFormat('MMM d').format(date);
       }
     } catch (e) {
-      return '';
+      return ''; // Return empty string if parsing fails
     }
   }
 }

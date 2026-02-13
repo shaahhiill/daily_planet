@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/auth_provider.dart';
 import 'register_screen.dart';
 
+/// Login screen with email/password authentication
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
   @override
@@ -10,10 +11,11 @@ class LoginScreen extends ConsumerStatefulWidget {
 }
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
+  // Text field controllers
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _isLoading = false;
-  String? _errorMessage;
+  bool _isLoading = false; // Track login progress
+  String? _errorMessage; // Display errors to user
 
   @override
   void dispose() {
@@ -22,6 +24,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     super.dispose();
   }
 
+  // Handle login with Firebase Authentication
   Future<void> _login() async {
     setState(() {
       _isLoading = true;
@@ -33,6 +36,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
+      // On success, auth state listener navigates to home
     } catch (e) {
       setState(() => _errorMessage = e.toString());
     } finally {
@@ -42,7 +46,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark =
+        Theme.of(context).brightness == Brightness.dark; // Check theme
 
     return Scaffold(
       backgroundColor:
@@ -111,16 +116,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: _isLoading ? null : _login,
+                  onPressed:
+                      _isLoading ? null : _login, // Disable while loading
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFE53935),
+                    backgroundColor: const Color(0xFFE53935), // Red theme color
                     disabledBackgroundColor:
                         const Color(0xFFE53935).withOpacity(0.5),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: _isLoading
+                  child: _isLoading // Show spinner or text
                       ? const CircularProgressIndicator(
                           color: Colors.white,
                           strokeWidth: 2,

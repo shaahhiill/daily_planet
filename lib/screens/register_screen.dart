@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/auth_provider.dart';
 
+/// Registration screen for new users
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
   @override
@@ -9,12 +10,13 @@ class RegisterScreen extends ConsumerStatefulWidget {
 }
 
 class _RegisterScreenState extends ConsumerState<RegisterScreen> {
+  // Text field controllers
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  bool _isLoading = false;
-  String? _errorMessage;
+  bool _isLoading = false; // Track registration progress
+  String? _errorMessage; // Display errors to user
 
   @override
   void dispose() {
@@ -25,7 +27,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     super.dispose();
   }
 
+  // Handle registration with Firebase Authentication
   Future<void> _register() async {
+    // Validate password match
     if (_passwordController.text != _confirmPasswordController.text) {
       setState(() => _errorMessage = 'Passwords do not match');
       return;
@@ -40,7 +44,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
-      if (mounted) Navigator.pop(context);
+      if (mounted) Navigator.pop(context); // Return to login on success
     } catch (e) {
       setState(() => _errorMessage = e.toString());
     } finally {
@@ -50,10 +54,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark =
+        Theme.of(context).brightness == Brightness.dark; // Check theme
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF0A0A0A) : const Color(0xFFF5F5F5),
+      backgroundColor:
+          isDark ? const Color(0xFF0A0A0A) : const Color(0xFFF5F5F5),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -85,20 +91,27 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 40),
-              _buildTextField(context, 'Full Name', Icons.person_outlined, _nameController, isDark),
+              _buildTextField(context, 'Full Name', Icons.person_outlined,
+                  _nameController, isDark),
               const SizedBox(height: 16),
-              _buildTextField(context, 'Email', Icons.email_outlined, _emailController, isDark),
+              _buildTextField(context, 'Email', Icons.email_outlined,
+                  _emailController, isDark),
               const SizedBox(height: 16),
-              _buildTextField(context, 'Password', Icons.lock_outlined, _passwordController, isDark, isPassword: true),
+              _buildTextField(context, 'Password', Icons.lock_outlined,
+                  _passwordController, isDark,
+                  isPassword: true),
               const SizedBox(height: 16),
-              _buildTextField(context, 'Confirm Password', Icons.lock_outlined, _confirmPasswordController, isDark, isPassword: true),
+              _buildTextField(context, 'Confirm Password', Icons.lock_outlined,
+                  _confirmPasswordController, isDark,
+                  isPassword: true),
               const SizedBox(height: 12),
               if (_errorMessage != null)
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
                     _errorMessage!,
-                    style: const TextStyle(color: Color(0xFFE53935), fontSize: 13),
+                    style:
+                        const TextStyle(color: Color(0xFFE53935), fontSize: 13),
                   ),
                 ),
               const SizedBox(height: 28),
@@ -109,12 +122,19 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   onPressed: _isLoading ? null : _register,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFE53935),
-                    disabledBackgroundColor: const Color(0xFFE53935).withOpacity(0.5),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    disabledBackgroundColor:
+                        const Color(0xFFE53935).withOpacity(0.5),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
                   ),
                   child: _isLoading
-                      ? const CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
-                      : const Text('Sign Up', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                      ? const CircularProgressIndicator(
+                          color: Colors.white, strokeWidth: 2)
+                      : const Text('Sign Up',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold)),
                 ),
               ),
               const SizedBox(height: 24),
@@ -123,13 +143,18 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 children: [
                   Text(
                     'Already have an account? ',
-                    style: TextStyle(color: isDark ? Colors.white54 : Colors.black54, fontSize: 14),
+                    style: TextStyle(
+                        color: isDark ? Colors.white54 : Colors.black54,
+                        fontSize: 14),
                   ),
                   GestureDetector(
                     onTap: () => Navigator.pop(context),
                     child: const Text(
                       'Login',
-                      style: TextStyle(color: Color(0xFFE53935), fontSize: 14, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                          color: Color(0xFFE53935),
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold),
                     ),
                   ),
                 ],
@@ -141,11 +166,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     );
   }
 
-  Widget _buildTextField(BuildContext context, String label, IconData icon, TextEditingController controller, bool isDark, {bool isPassword = false}) {
+  Widget _buildTextField(BuildContext context, String label, IconData icon,
+      TextEditingController controller, bool isDark,
+      {bool isPassword = false}) {
     return TextField(
       controller: controller,
       obscureText: isPassword,
-      style: TextStyle(color: isDark ? Colors.white : Colors.black, fontSize: 15),
+      style:
+          TextStyle(color: isDark ? Colors.white : Colors.black, fontSize: 15),
       decoration: InputDecoration(
         labelText: label,
         labelStyle: TextStyle(color: isDark ? Colors.white38 : Colors.black38),

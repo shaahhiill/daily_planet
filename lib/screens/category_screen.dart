@@ -7,9 +7,7 @@ import '../providers/news_provider.dart';
 import '../widgets/hero_card.dart';
 import 'article_detail_screen.dart';
 
-/// Category screen - displays news articles filtered by category
-/// User arrives here after tapping a category from Explore screen
-/// Shows a featured article at top + scrollable list of other articles
+/// Category screen - displays news filtered by category
 class CategoryScreen extends ConsumerWidget {
   // Category ID for API call (e.g., "sports", "technology")
   final String category;

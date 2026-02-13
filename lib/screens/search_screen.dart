@@ -4,9 +4,7 @@ import '../providers/news_provider.dart';
 import '../widgets/news_card.dart';
 import 'article_detail_screen.dart';
 
-/// Search screen - allows users to search for news articles by keyword
-/// Uses NewsAPI search endpoint to find articles matching the query
-/// Shows results in a scrollable list
+/// Search screen - search news articles by keyword
 class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({super.key});
 

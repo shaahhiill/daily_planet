@@ -9,8 +9,7 @@ import '../providers/theme_provider.dart';
 import '../providers/auth_provider.dart';
 import 'article_detail_screen.dart';
 
-/// Home screen - displays Editor's Pick carousel and latest news grid
-/// This is the main landing screen after login
+/// Home screen - displays top headlines with pull-to-refresh
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
@@ -21,17 +20,17 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    // Fetch top headlines from NewsAPI (null = all categories)
-    final newsAsync = ref.watch(topHeadlinesProvider(null));
+    final isDark =
+        Theme.of(context).brightness == Brightness.dark; // Check theme
+    final newsAsync =
+        ref.watch(topHeadlinesProvider(null)); // Fetch top headlines
 
     return Scaffold(
       backgroundColor:
           isDark ? const Color(0xFF0A0A0A) : const Color(0xFFF5F5F5),
       body: Stack(
         children: [
-          // Main content
+          // Main content with news articles
           SafeArea(
             child: newsAsync.when(
               loading: () => const Center(
@@ -61,16 +60,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 return RefreshIndicator(
                   color: const Color(0xFFE53935),
                   onRefresh: () async {
-                    // Invalidate the provider to trigger a refresh
+                    // Pull-to-refresh: invalidate and refetch news
                     ref.invalidate(topHeadlinesProvider(null));
-                    // Wait for the new data to load
                     await ref.read(topHeadlinesProvider(null).future);
                   },
                   child: CustomScrollView(
                     slivers: [
                       _buildAppBar(isDark),
-
-                      // "Editor's Pick" section title
                       SliverToBoxAdapter(
                         child: Padding(
                           padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
@@ -84,22 +80,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           ),
                         ),
                       ),
-
-                      // News grid - first article full size, rest horizontal
                       SliverPadding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         sliver: SliverList(
                           delegate: SliverChildBuilderDelegate(
                             (context, index) {
                               final article = articles[index];
-
-                              // ONLY FIRST ARTICLE (index 0): Full size featured card
+                              // First article gets featured card, rest get horizontal cards
                               if (index == 0) {
                                 return _buildFeaturedGridCard(
                                     article, articles, index, isDark);
                               }
-
-                              // ALL OTHER ARTICLES: Horizontal compact cards
                               return _buildHorizontalNewsCard(
                                   article, articles, index, isDark);
                             },
@@ -113,33 +104,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               },
             ),
           ),
-
-          // Offline detection banner at the top
+          // Offline banner overlay (shows when no internet)
           _buildOfflineBanner(ref, isDark),
         ],
       ),
     );
   }
 
-  /// Build the top app bar with Daily Planet logo and weather widget
   Widget _buildAppBar(bool isDark) {
     return SliverAppBar(
       backgroundColor:
           isDark ? const Color(0xFF0A0A0A) : const Color(0xFFF5F5F5),
-      pinned: true, // Keep visible when scrolling
+      pinned: true,
       elevation: 0,
       toolbarHeight: 70,
       title: Row(
         children: [
-          // Daily Planet logo on the left
           Image.asset(
             'assets/images/daily_planet_logo.png',
             height: 40,
             fit: BoxFit.contain,
           ),
           const Spacer(),
-
-          // Weather widget on the right (hardcoded for now)
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
@@ -161,10 +147,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ],
             ),
           ),
-
           const SizedBox(width: 8),
-
-          // Theme toggle button
           Container(
             decoration: BoxDecoration(
               color: isDark ? const Color(0xFF1A1A1A) : Colors.white,
@@ -172,29 +155,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
             child: Consumer(
               builder: (context, ref, _) {
-                // Watch current theme mode
                 final themeMode = ref.watch(themeModeProvider);
                 final isLightMode = themeMode == ThemeMode.light;
-
                 return IconButton(
                   icon: Icon(
-                    // Show sun icon in dark mode, moon in light mode
                     isLightMode ? Icons.dark_mode : Icons.light_mode,
                     color: isDark ? Colors.white : Colors.black,
                     size: 22,
                   ),
                   onPressed: () {
-                    // Toggle theme when tapped
                     ref.read(themeModeProvider.notifier).toggleTheme();
                   },
                 );
               },
             ),
           ),
-
           const SizedBox(width: 8),
-
-          // Profile/Settings icon button
           Container(
             decoration: BoxDecoration(
               color: isDark ? const Color(0xFF1A1A1A) : Colors.white,
@@ -214,24 +190,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  /// Build offline detection banner
-  /// Shows red banner at top when internet connection is lost
-  /// Automatically hides when connection is restored
-  /// Parameters:
-  /// - ref: WidgetRef to access providers
-  /// - isDark: Whether dark mode is active
+  // Build offline banner that appears when no internet connection
   Widget _buildOfflineBanner(WidgetRef ref, bool isDark) {
-    // Watch the online status provider
-    final isOnlineAsync = ref.watch(isOnlineProvider);
+    final isOnlineAsync =
+        ref.watch(isOnlineProvider); // Watch connectivity status
 
     return isOnlineAsync.when(
       data: (isOnline) {
-        // Only show banner when offline
         if (isOnline) {
           return const SizedBox.shrink(); // Hide banner when online
         }
-
-        // Show red offline banner
         return Positioned(
           top: 0,
           left: 0,
@@ -241,7 +209,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               margin: const EdgeInsets.all(8),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                // Red background for alert
                 color: const Color(0xFFE53935),
                 borderRadius: BorderRadius.circular(8),
                 boxShadow: [
@@ -254,14 +221,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
               child: Row(
                 children: [
-                  // Offline icon
                   const Icon(
                     Icons.wifi_off,
                     color: Colors.white,
                     size: 20,
                   ),
                   const SizedBox(width: 12),
-                  // Offline message
                   const Expanded(
                     child: Text(
                       'No internet connection. Showing offline content.',
@@ -278,18 +243,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         );
       },
-      loading: () => const SizedBox.shrink(), // Hide while checking
-      error: (_, __) => const SizedBox.shrink(), // Hide on error
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
     );
   }
 
-  /// Build horizontal news card (image left/right, text opposite)
-  /// Compact layout matching "You may also like" style
-  /// Parameters:
-  /// - article: Article to display
-  /// - articleList: Full list for navigation
-  /// - index: Position in list
-  /// - isDark: Whether dark mode is active
+  // Build horizontal news card (compact layout with image on right)
   Widget _buildHorizontalNewsCard(
     Article article,
     List<Article> articleList,
@@ -319,12 +278,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Article title and source on LEFT
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Source label in red
                   if (article.source != null)
                     Text(
                       article.source!,
@@ -334,10 +291,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-
                   const SizedBox(height: 6),
-
-                  // Article title
                   Text(
                     article.title ?? 'No title',
                     style: TextStyle(
@@ -349,10 +303,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     maxLines: 3,
                     overflow: TextOverflow.ellipsis,
                   ),
-
                   const SizedBox(height: 6),
-
-                  // Author and time (NEW)
                   if (article.author != null || article.publishedAt != null)
                     Text(
                       '${article.author ?? 'Unknown'} • ${_formatTime(article.publishedAt ?? '')}',
@@ -366,10 +317,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ],
               ),
             ),
-
             const SizedBox(width: 12),
-
-            // Article thumbnail on RIGHT
             if (article.urlToImage != null && article.urlToImage!.isNotEmpty)
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
@@ -421,13 +369,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  /// Build featured grid card for first article in grid
-  /// Shows large image on top, content below (different from carousel overlay style)
-  /// Parameters:
-  /// - article: Article to display
-  /// - articleList: Full list for navigation
-  /// - index: Position in list
-  /// - isDark: Whether dark mode is active
+  // Build featured card for first article (large image on top)
   Widget _buildFeaturedGridCard(
     Article article,
     List<Article> articleList,
@@ -456,7 +398,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Large image on top
             if (article.urlToImage != null && article.urlToImage!.isNotEmpty)
               ClipRRect(
                 borderRadius:
@@ -503,14 +444,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                 ),
               ),
-
-            // Content below image
             Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Source label
                   if (article.source != null)
                     Text(
                       article.source!,
@@ -521,8 +459,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                     ),
                   const SizedBox(height: 8),
-
-                  // Title
                   Text(
                     article.title ?? 'No title',
                     style: TextStyle(
@@ -535,8 +471,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 8),
-
-                  // Author and time
                   if (article.author != null || article.publishedAt != null)
                     Text(
                       '${article.author ?? ''} • 1d ago',
@@ -554,39 +488,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  /// Format timestamp to relative time (e.g., "2h ago", "1d ago")
-  /// Parameters:
-  /// - dateString: ISO date string from API
+  // Format timestamp to relative time (e.g., "2h ago", "1d ago")
   String _formatTime(String dateString) {
     if (dateString.isEmpty) return '';
-
     try {
       final date = DateTime.parse(dateString);
       final now = DateTime.now();
       final difference = now.difference(date);
-
-      if (difference.inMinutes < 60) {
-        return '${difference.inMinutes}m ago';
-      } else if (difference.inHours < 24) {
-        return '${difference.inHours}h ago';
-      } else if (difference.inDays < 7) {
-        return '${difference.inDays}d ago';
-      } else {
-        return DateFormat('MMM d').format(date);
-      }
+      if (difference.inMinutes < 60) return '${difference.inMinutes}m ago';
+      if (difference.inHours < 24) return '${difference.inHours}h ago';
+      if (difference.inDays < 7) return '${difference.inDays}d ago';
+      return DateFormat('MMM d').format(date);
     } catch (e) {
       return '';
     }
   }
 
-  /// Show profile bottom sheet with user info and logout
-  /// Displays user email, theme toggle, and logout button
-  /// Parameters:
-  /// - context: BuildContext for showing bottom sheet
-  /// - isDark: Whether dark mode is active
+  // Show profile bottom sheet with user info and logout
   void _showProfileSheet(BuildContext context, bool isDark) {
-    // Get current user from Firebase
-    final user = ref.read(authStateProvider).value;
+    final user = ref.read(authStateProvider).value; // Get current user
 
     showModalBottomSheet(
       context: context,
@@ -600,7 +520,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Drag handle indicator
             Container(
               width: 40,
               height: 4,
@@ -610,8 +529,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
-
-            // Profile icon
             Container(
               width: 70,
               height: 70,
@@ -625,10 +542,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 color: Color(0xFFE53935),
               ),
             ),
-
             const SizedBox(height: 16),
-
-            // User email
             Text(
               user?.email ?? 'No email',
               style: TextStyle(
@@ -637,15 +551,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-
             const SizedBox(height: 24),
-
-            // Divider
             Divider(color: isDark ? Colors.white12 : Colors.black12),
-
             const SizedBox(height: 16),
-
-            // Logout button
             ListTile(
               leading: const Icon(
                 Icons.logout,
@@ -659,10 +567,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ),
               onTap: () async {
-                // Close bottom sheet first
                 Navigator.pop(context);
-
-                // Show confirmation dialog
                 final shouldLogout = await showDialog<bool>(
                   context: context,
                   builder: (context) => AlertDialog(
@@ -700,15 +605,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ],
                   ),
                 );
-
-                // If user confirmed, logout
                 if (shouldLogout == true) {
                   final authService = ref.read(authServiceProvider);
                   await authService.logout();
                 }
               },
             ),
-
             const SizedBox(height: 16),
           ],
         ),

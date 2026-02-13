@@ -6,9 +6,7 @@ import '../providers/saved_provider.dart';
 import '../models/article.dart';
 import 'article_detail_screen.dart';
 
-/// Saved screen - displays articles that user has bookmarked
-/// Articles are stored locally using SharedPreferences
-/// User can remove articles by unsaving them from article detail screen
+/// Saved screen - displays bookmarked articles
 class SavedScreen extends ConsumerWidget {
   const SavedScreen({super.key});
 

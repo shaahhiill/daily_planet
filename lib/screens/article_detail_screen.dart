@@ -7,11 +7,7 @@ import '../models/article.dart';
 import '../providers/saved_provider.dart';
 import '../providers/news_provider.dart';
 
-/// Article detail screen - displays full article content
-/// Shows image, title, description, author, time, and save button
-/// User can bookmark/unbookmark articles from here
-/// Supports swipe gestures to navigate to next/previous article
-/// This is the master/detail pattern required by marking scheme
+/// Article detail screen with swipe navigation
 class ArticleDetailScreen extends ConsumerStatefulWidget {
   // The current article to display
   final Article article;

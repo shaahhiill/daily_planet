@@ -7,6 +7,7 @@ import '../screens/search_screen.dart';
 import '../providers/auth_provider.dart';
 import '../providers/theme_provider.dart';
 
+/// Main app shell with bottom/side navigation
 class AppShell extends ConsumerStatefulWidget {
   const AppShell({super.key});
   @override
@@ -14,9 +15,11 @@ class AppShell extends ConsumerStatefulWidget {
 }
 
 class _AppShellState extends ConsumerState<AppShell> {
-  int _currentIndex = 0;
-  final PageController _pageController = PageController();
+  int _currentIndex = 0; // Track active screen
+  final PageController _pageController =
+      PageController(); // For swipe navigation
 
+  // All app screens
   final List<Widget> _screens = const [
     HomeScreen(),
     ExploreScreen(),
@@ -33,14 +36,15 @@ class _AppShellState extends ConsumerState<AppShell> {
   @override
   Widget build(BuildContext context) {
     final orientation = MediaQuery.of(context).orientation;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark =
+        Theme.of(context).brightness == Brightness.dark; // Check theme
 
     return Scaffold(
       backgroundColor:
           isDark ? const Color(0xFF0A0A0A) : const Color(0xFFF5F5F5),
       body: orientation == Orientation.landscape
-          ? _buildLandscapeLayout(context, isDark)
-          : _buildPortraitLayout(context, isDark),
+          ? _buildLandscapeLayout(context, isDark) // Side nav for landscape
+          : _buildPortraitLayout(context, isDark), // Bottom nav for portrait
     );
   }
 
@@ -50,7 +54,8 @@ class _AppShellState extends ConsumerState<AppShell> {
         Expanded(
           child: PageView(
             controller: _pageController,
-            onPageChanged: (index) => setState(() => _currentIndex = index),
+            onPageChanged: (index) =>
+                setState(() => _currentIndex = index), // Update on swipe
             children: _screens,
           ),
         ),
@@ -59,6 +64,7 @@ class _AppShellState extends ConsumerState<AppShell> {
     );
   }
 
+  // Landscape layout with side navigation
   Widget _buildLandscapeLayout(BuildContext context, bool isDark) {
     return Row(
       children: [
@@ -70,6 +76,7 @@ class _AppShellState extends ConsumerState<AppShell> {
     );
   }
 
+  // Bottom navigation bar for portrait mode
   Widget _buildBottomNav(BuildContext context, bool isDark) {
     return Container(
       height: 70,
@@ -82,44 +89,50 @@ class _AppShellState extends ConsumerState<AppShell> {
         ),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        mainAxisAlignment: MainAxisAlignment.spaceAround, // Evenly space icons
         children: [
+          // Home icon (index 0)
           _buildNavIcon(Icons.home_outlined, Icons.home, 0, isDark),
+          // Explore icon (index 1)
           _buildNavIcon(Icons.explore_outlined, Icons.explore, 1, isDark),
+          // Saved/Bookmarks icon (index 2)
           _buildNavIcon(Icons.bookmark_outline, Icons.bookmark, 2, isDark),
+          // Search icon (index 3)
           _buildNavIcon(Icons.search, Icons.search, 3, isDark),
         ],
       ),
     );
   }
 
+  // Individual navigation icon button
   Widget _buildNavIcon(
       IconData unselected, IconData selected, int index, bool isDark) {
-    final isSelected = _currentIndex == index;
+    final isSelected = _currentIndex == index; // Check if this icon is active
     return GestureDetector(
       onTap: () {
         setState(() => _currentIndex = index);
-        _pageController.animateToPage(index,
+        _pageController.animateToPage(index, // Animate to selected page
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOut);
       },
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
         child: Icon(
-          isSelected ? selected : unselected,
+          isSelected ? selected : unselected, // Filled icon when selected
           color: isSelected
-              ? const Color(0xFFE53935)
+              ? const Color(0xFFE53935) // Red when selected
               : isDark
-                  ? Colors.white54
-                  : Colors.black54,
+                  ? Colors.white54 // Gray in dark mode
+                  : Colors.black54, // Gray in light mode
           size: 24,
         ),
       ),
     );
   }
 
+  // Side navigation for landscape mode
   Widget _buildSideNav(BuildContext context, bool isDark) {
-    final labels = ['Home', 'Explore', 'Saved', 'Search'];
+    final labels = ['Home', 'Explore', 'Saved', 'Search']; // Nav item labels
     return Container(
       width: 200,
       decoration: BoxDecoration(
@@ -132,16 +145,19 @@ class _AppShellState extends ConsumerState<AppShell> {
       ),
       child: Column(
         children: [
-          const SizedBox(height: 60),
+          const SizedBox(height: 60), // Top spacing
+          // Generate 4 navigation items
           ...List.generate(4, (index) {
-            final isSelected = _currentIndex == index;
+            final isSelected = _currentIndex == index; // Check if active
             return GestureDetector(
-              onTap: () => setState(() => _currentIndex = index),
+              onTap: () =>
+                  setState(() => _currentIndex = index), // Switch screen
               child: Container(
                 width: double.infinity,
                 padding:
                     const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
                 decoration: BoxDecoration(
+                  // Highlight background when selected
                   color: isSelected
                       ? (isDark
                           ? Colors.white.withOpacity(0.08)
@@ -149,6 +165,7 @@ class _AppShellState extends ConsumerState<AppShell> {
                       : Colors.transparent,
                   border: Border(
                     left: BorderSide(
+                      // Red left border when selected
                       color: isSelected
                           ? const Color(0xFFE53935)
                           : Colors.transparent,
@@ -157,7 +174,7 @@ class _AppShellState extends ConsumerState<AppShell> {
                   ),
                 ),
                 child: Text(
-                  labels[index],
+                  labels[index], // Display label text
                   style: TextStyle(
                     color: isSelected
                         ? const Color(0xFFE53935)
@@ -172,7 +189,7 @@ class _AppShellState extends ConsumerState<AppShell> {
               ),
             );
           }),
-          const Spacer(),
+          const Spacer(), // Push theme toggle and logout to bottom
           // Theme toggle button
           Padding(
             padding: const EdgeInsets.all(16),
@@ -210,12 +227,13 @@ class _AppShellState extends ConsumerState<AppShell> {
               ),
             ),
           ),
+          // Logout button
           Padding(
             padding: const EdgeInsets.all(16),
             child: GestureDetector(
               onTap: () async {
                 final authService = ref.read(authServiceProvider);
-                await authService.logout();
+                await authService.logout(); // Sign out user
               },
               child: Row(
                 children: [
