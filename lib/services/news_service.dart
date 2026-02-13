@@ -1,12 +1,13 @@
 import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../models/article.dart';
 
 /// Service for fetching news articles from NewsAPI
 class NewsService {
-  final String _apikey =
-      '//add your api key here'; // NewsAPI key // NewsAPI key
+  // Load API key from .env file for security
+  final String _apikey = dotenv.env['NEWS_API_KEY'] ?? '';
   final String _baseUrl = 'https://newsapi.org/v2'; // NewsAPI base URL
 
   /// Fetch top headlines, optionally filtered by category
