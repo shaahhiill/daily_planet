@@ -15,7 +15,6 @@ dependencies:
   riverpod: ^2.6.1
   http: ^1.2.2
   shared_preferences: ^2.3.3
-
   connectivity_plus: ^6.0.5
   cached_network_image: ^3.4.1
   flutter_dotenv: ^5.2.1
@@ -26,6 +25,7 @@ dev_dependencies:
   flutter_lints: ^5.0.0
   flutter_test:
     sdk: flutter
+  flutter_launcher_icons: ^0.13.1
 
 flutter:
   uses-material-design: true
@@ -34,3 +34,10 @@ flutter:
     - assets/images/
     - assets/images/social/
     - assets/json/
+
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: "assets/images/app_icon_black_bg.png"
+  adaptive_icon_background: "#0A0A0A"
+  adaptive_icon_foreground: "assets/images/app_icon_black_bg.png"
