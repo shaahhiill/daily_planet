@@ -35,9 +35,7 @@ void main() async {
   );
 }
 
-// ============================================================================
 // Main App Widget - Theme & Routing Configuration
-// ============================================================================
 class DailyPlanetApp extends ConsumerWidget {
   const DailyPlanetApp({super.key});
 
@@ -52,9 +50,7 @@ class DailyPlanetApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       themeMode: themeMode,
 
-      // ========================================================================
       // Light Theme Configuration
-      // ========================================================================
       theme: ThemeData(
         useMaterial3: true,
         brightness: Brightness.light,
