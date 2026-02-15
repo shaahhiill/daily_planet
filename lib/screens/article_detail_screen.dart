@@ -457,27 +457,39 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
           const SizedBox(height: 24),
 
           // Note about full article
+          // Info box that informs users this is only a preview
+          // and directs them to tap the button below to read the complete article
           Container(
+            // Inner padding for content spacing
             padding: const EdgeInsets.all(16),
+            // Styled box with rounded corners and border
             decoration: BoxDecoration(
+              // Background color adapts to theme
               color: isDark ? const Color(0xFF1A1A1A) : const Color(0xFFF5F5F5),
+              // Rounded corners for modern look
               borderRadius: BorderRadius.circular(12),
+              // Subtle border for definition
               border: Border.all(
                 color: isDark ? Colors.white12 : Colors.black12,
               ),
             ),
+            // Horizontal layout with icon and text
             child: Row(
               children: [
+                // Info icon to indicate this is an informational message
                 Icon(
                   Icons.info_outline,
                   color: isDark ? Colors.white54 : Colors.black54,
                   size: 20,
                 ),
                 const SizedBox(width: 12),
+                // Message text that wraps if needed
                 Expanded(
                   child: Text(
-                    'This is a preview. Full article available on the original source.',
+                    // Dynamic message showing the article source
+                    'This is a preview. Tap below to read the full article on ${currentArticle.source ?? 'the source'}.',
                     style: TextStyle(
+                      // Muted color to indicate secondary information
                       color: isDark ? Colors.white54 : Colors.black54,
                       fontSize: 13,
                     ),
@@ -489,34 +501,52 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
 
           const SizedBox(height: 16),
 
-          // Button to open full article in external browser
+          // Read Full Article Button
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
               onPressed: () async {
-                // Check if article has a valid URL
-                if (currentArticle.url != null &&
-                    currentArticle.url!.isNotEmpty) {
+                // Debug: print the URL to see what we have
+                print('Article URL: ${currentArticle.url}');
+
+                if (currentArticle.url == null || currentArticle.url!.isEmpty) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('No URL available for this article'),
+                        backgroundColor: Color(0xFFE53935),
+                      ),
+                    );
+                  }
+                  return;
+                }
+
+                try {
                   final url = Uri.parse(currentArticle.url!);
-                  // Verify URL can be launched
-                  if (await canLaunchUrl(url)) {
-                    // Open in external browser app
+
+                  // Try to launch URL
+                  final canLaunch = await canLaunchUrl(url);
+                  print('Can launch URL: $canLaunch');
+
+                  if (canLaunch) {
                     await launchUrl(url, mode: LaunchMode.externalApplication);
                   } else {
-                    // Show error if URL cannot be opened
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Could not open article'),
-                          backgroundColor: Color(0xFFE53935),
-                        ),
-                      );
-                    }
+                    // Try without checking canLaunchUrl
+                    await launchUrl(url, mode: LaunchMode.externalApplication);
+                  }
+                } catch (e) {
+                  print('Error launching URL: $e');
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Error opening article: $e'),
+                        backgroundColor: Color(0xFFE53935),
+                      ),
+                    );
                   }
                 }
               },
-              icon: const Icon(Icons.open_in_new,
-                  color: Colors.white), // External link icon
+              icon: const Icon(Icons.open_in_new, color: Colors.white),
               label: const Text(
                 'Read Full Article',
                 style: TextStyle(
@@ -526,11 +556,10 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
                 ),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFE53935), // Brand red
-                padding: const EdgeInsets.symmetric(
-                    vertical: 16), // Tall button for easy tapping
+                backgroundColor: const Color(0xFFE53935),
+                padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12), // Rounded corners
+                  borderRadius: BorderRadius.circular(12),
                 ),
               ),
             ),
@@ -568,6 +597,7 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
 
         // Row of social media icons
         Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // WhatsApp share button
             _buildShareButton(
