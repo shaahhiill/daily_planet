@@ -489,17 +489,21 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
 
           const SizedBox(height: 16),
 
-          // Read Full Article Button
+          // Button to open full article in external browser
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
               onPressed: () async {
+                // Check if article has a valid URL
                 if (currentArticle.url != null &&
                     currentArticle.url!.isNotEmpty) {
                   final url = Uri.parse(currentArticle.url!);
+                  // Verify URL can be launched
                   if (await canLaunchUrl(url)) {
+                    // Open in external browser app
                     await launchUrl(url, mode: LaunchMode.externalApplication);
                   } else {
+                    // Show error if URL cannot be opened
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
@@ -511,7 +515,8 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
                   }
                 }
               },
-              icon: const Icon(Icons.open_in_new, color: Colors.white),
+              icon: const Icon(Icons.open_in_new,
+                  color: Colors.white), // External link icon
               label: const Text(
                 'Read Full Article',
                 style: TextStyle(
@@ -521,10 +526,11 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
                 ),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFE53935),
-                padding: const EdgeInsets.symmetric(vertical: 16),
+                backgroundColor: const Color(0xFFE53935), // Brand red
+                padding: const EdgeInsets.symmetric(
+                    vertical: 16), // Tall button for easy tapping
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(12), // Rounded corners
                 ),
               ),
             ),
