@@ -71,10 +71,10 @@ This test plan covers functional, UI/UX, and device compatibility testing for th
 | TC-21: Theme Toggle | Tap sun/moon icon in header | App switches between light/dark mode |  PASS | Theme persists |
 | TC-22: Offline Detection | Turn off WiFi/mobile data | Red banner appears at top |  PASS | Shows offline message |
 | TC-23: Online Detection | Turn WiFi back on | Red banner disappears |  PASS | Real-time detection |
-| TC-24: Social Share - WhatsApp | Tap WhatsApp icon on article | Opens WhatsApp with article link |  PASS | Deep linking works |
+| TC-24: Social Share - WhatsApp | Tap WhatsApp icon on article | Opens WhatsApp with article link |  FAIL | ---- |
 | TC-25: Social Share - Instagram | Tap Instagram icon | Opens Instagram app |  PASS | App opens |
-| TC-26: Social Share - Twitter | Tap Twitter icon | Opens Twitter with pre-filled tweet |  PASS | Share intent works |
-| TC-27: Social Share - LinkedIn | Tap LinkedIn icon | Opens LinkedIn share dialog |  PASS | Web share works |
+| TC-26: Social Share - X | Tap X icon | Opens X with pre-filled tweet |  FAIL | ---- |
+| TC-27: Social Share - LinkedIn | Tap LinkedIn icon | Opens LinkedIn share dialog |  FAIL | ---- |
 | TC-28: Swipe Navigation (Right) | Swipe right on article detail | Shows previous article |  PASS | Gesture works |
 | TC-29: Swipe Navigation (Left) | Swipe left on article detail | Shows next article |  PASS | Updates UI |
 | TC-30: Swipe at Boundaries | Swipe at first/last article | Shows snackbar message |  PASS | Handles edge cases |
@@ -117,17 +117,17 @@ This test plan covers functional, UI/UX, and device compatibility testing for th
 ## 3. Test Summary
 
 **Total Test Cases:** 42  
-**Passed:** 42 
-**Failed:** 0
-**Pass Rate:** 100%
+**Passed:** 39 
+**Failed:** 3
 
 ---
 
 ## 4. Known Issues
 
-None identified during testing.
-
----
+TC-24: Social Share (WhatsApp) – WhatsApp did not open with the article link.
+TC-26: Social Share (X) – X did not generate the pre-filled tweet as expected.  
+TC-27: Social Share (LinkedIn) – LinkedIn sharing did not open as expected.
+TC-43: Empty Search Query – No validation when searching with empty query.
 
 ## 5. Testing Environment
 

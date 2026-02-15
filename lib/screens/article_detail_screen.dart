@@ -487,6 +487,49 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
             ),
           ),
 
+          const SizedBox(height: 16),
+
+          // Read Full Article Button
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () async {
+                if (currentArticle.url != null &&
+                    currentArticle.url!.isNotEmpty) {
+                  final url = Uri.parse(currentArticle.url!);
+                  if (await canLaunchUrl(url)) {
+                    await launchUrl(url, mode: LaunchMode.externalApplication);
+                  } else {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Could not open article'),
+                          backgroundColor: Color(0xFFE53935),
+                        ),
+                      );
+                    }
+                  }
+                }
+              },
+              icon: const Icon(Icons.open_in_new, color: Colors.white),
+              label: const Text(
+                'Read Full Article',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFE53935),
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ),
+
           const SizedBox(height: 32),
 
           // "You may also like" section with related articles
@@ -637,7 +680,6 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
   }
 
   /// Share article to Instagram
-  /// Note: Instagram doesn't support direct URL sharing via deep links
   /// This opens Instagram app, user must manually paste content
   void _shareToInstagram() async {
     // Instagram doesn't have a direct share URL scheme for articles

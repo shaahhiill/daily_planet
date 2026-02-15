@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/auth_provider.dart';
 import 'register_screen.dart';
 
-/// Login screen with email/password authentication
+/// Login screen with email/password authentication using Firebase
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
   @override
@@ -19,6 +19,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   void dispose() {
+    // Clean up controllers to prevent memory leaks
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -26,20 +27,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   // Handle login with Firebase Authentication
   Future<void> _login() async {
+    // Set loading state and clear any previous errors
     setState(() {
       _isLoading = true;
       _errorMessage = null;
     });
     try {
+      // Get auth service from provider
       final authService = ref.read(authServiceProvider);
+      // Attempt login with trimmed email and password
       await authService.login(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
-      // On success, auth state listener navigates to home
+      // On success, auth state listener in main.dart navigates to home
     } catch (e) {
+      // Display error message if login fails
       setState(() => _errorMessage = e.toString());
     } finally {
+      // Reset loading state (only if widget still mounted)
       if (mounted) setState(() => _isLoading = false);
     }
   }
@@ -58,6 +64,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              // Daily Planet logo at top of login screen
               Image.asset(
                 'assets/images/daily_planet_logo.png',
                 width: 260,
@@ -100,13 +107,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 isPassword: true,
               ),
               const SizedBox(height: 12),
+              // Show error message if login fails
               if (_errorMessage != null)
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
                     _errorMessage!,
                     style: const TextStyle(
-                      color: Color(0xFFE53935),
+                      color: Color(0xFFE53935), // Red error text
                       fontSize: 13,
                     ),
                   ),
@@ -121,7 +129,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFE53935), // Red theme color
                     disabledBackgroundColor:
-                        const Color(0xFFE53935).withOpacity(0.5),
+                        const Color(0xFFE53935).withValues(alpha: 0.5),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -142,6 +150,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
               ),
               const SizedBox(height: 24),
+              // Link to registration screen for new users
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -152,6 +161,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       fontSize: 14,
                     ),
                   ),
+                  // Tappable "Sign Up" text
                   GestureDetector(
                     onTap: () => Navigator.push(
                       context,
@@ -162,7 +172,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     child: const Text(
                       'Sign Up',
                       style: TextStyle(
-                        color: Color(0xFFE53935),
+                        color: Color(0xFFE53935), // Brand red
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
                       ),
@@ -177,6 +187,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
   }
 
+  // Build styled text field for email/password input
   Widget _buildTextField(
     BuildContext context,
     String label,
@@ -187,7 +198,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }) {
     return TextField(
       controller: controller,
-      obscureText: isPassword,
+      obscureText: isPassword, // Hide text for password fields
       style: TextStyle(
         color: isDark ? Colors.white : Colors.black,
         fontSize: 15,
@@ -202,10 +213,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
         ),
+        // Red border when field is focused
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(
-            color: Color(0xFFE53935),
+            color: Color(0xFFE53935), // Brand red
             width: 1.5,
           ),
         ),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/auth_provider.dart';
 
-/// Registration screen for new users
+/// Registration screen for new users using Firebase Authentication
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
   @override
@@ -20,6 +20,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   @override
   void dispose() {
+    // Clean up all controllers to prevent memory leaks
     _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
@@ -29,25 +30,33 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   // Handle registration with Firebase Authentication
   Future<void> _register() async {
-    // Validate password match
+    // Validate that password and confirm password match
+    // This check happens before calling Firebase
     if (_passwordController.text != _confirmPasswordController.text) {
       setState(() => _errorMessage = 'Passwords do not match');
-      return;
+      return; // Exit early if passwords don't match
     }
+    // Set loading state and clear any previous errors
     setState(() {
       _isLoading = true;
       _errorMessage = null;
     });
     try {
+      // Get auth service from provider
       final authService = ref.read(authServiceProvider);
+      // Create new user account with Firebase
+      // Note: Name is collected but not currently stored in Firebase
       await authService.signUp(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
-      if (mounted) Navigator.pop(context); // Return to login on success
+      // Navigate back to login screen on successful registration
+      if (mounted) Navigator.pop(context);
     } catch (e) {
+      // Display error message if registration fails
       setState(() => _errorMessage = e.toString());
     } finally {
+      // Reset loading state (only if widget still mounted)
       if (mounted) setState(() => _isLoading = false);
     }
   }
@@ -66,6 +75,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              // Daily Planet logo at top of registration screen
               Image.asset(
                 'assets/images/daily_planet_logo.png',
                 width: 260,
@@ -91,20 +101,25 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 40),
+              // Full name input field
               _buildTextField(context, 'Full Name', Icons.person_outlined,
                   _nameController, isDark),
               const SizedBox(height: 16),
+              // Email input field
               _buildTextField(context, 'Email', Icons.email_outlined,
                   _emailController, isDark),
               const SizedBox(height: 16),
+              // Password input field (obscured)
               _buildTextField(context, 'Password', Icons.lock_outlined,
                   _passwordController, isDark,
                   isPassword: true),
               const SizedBox(height: 16),
+              // Confirm password field (must match password)
               _buildTextField(context, 'Confirm Password', Icons.lock_outlined,
                   _confirmPasswordController, isDark,
                   isPassword: true),
               const SizedBox(height: 12),
+              // Show error message if registration fails or passwords don't match
               if (_errorMessage != null)
                 Align(
                   alignment: Alignment.centerLeft,
@@ -115,18 +130,21 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   ),
                 ),
               const SizedBox(height: 28),
+              // Sign Up button
               SizedBox(
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: _isLoading ? null : _register,
+                  onPressed:
+                      _isLoading ? null : _register, // Disable while loading
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFE53935),
+                    backgroundColor: const Color(0xFFE53935), // Brand red
                     disabledBackgroundColor:
-                        const Color(0xFFE53935).withOpacity(0.5),
+                        const Color(0xFFE53935).withValues(alpha: 0.5),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12)),
                   ),
+                  // Show spinner while loading, otherwise show "Sign Up" text
                   child: _isLoading
                       ? const CircularProgressIndicator(
                           color: Colors.white, strokeWidth: 2)
@@ -138,6 +156,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 ),
               ),
               const SizedBox(height: 24),
+              // Link back to login screen for existing users
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -147,12 +166,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         color: isDark ? Colors.white54 : Colors.black54,
                         fontSize: 14),
                   ),
+                  // Tappable "Login" text
                   GestureDetector(
-                    onTap: () => Navigator.pop(context),
+                    onTap: () => Navigator.pop(context), // Go back to login
                     child: const Text(
                       'Login',
                       style: TextStyle(
-                          color: Color(0xFFE53935),
+                          color: Color(0xFFE53935), // Brand red
                           fontSize: 14,
                           fontWeight: FontWeight.bold),
                     ),
@@ -166,12 +186,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     );
   }
 
+  // Build styled text field for form inputs
   Widget _buildTextField(BuildContext context, String label, IconData icon,
       TextEditingController controller, bool isDark,
       {bool isPassword = false}) {
     return TextField(
       controller: controller,
-      obscureText: isPassword,
+      obscureText: isPassword, // Hide text for password fields
       style:
           TextStyle(color: isDark ? Colors.white : Colors.black, fontSize: 15),
       decoration: InputDecoration(
@@ -184,6 +205,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
         ),
+        // Red border when field is focused
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: Color(0xFFE53935), width: 1.5),

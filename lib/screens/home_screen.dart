@@ -111,21 +111,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
+  /// Build the top app bar with logo, weather, theme toggle, and profile button
+  /// The app bar is pinned and stays visible when scrolling
   Widget _buildAppBar(bool isDark) {
     return SliverAppBar(
       backgroundColor:
           isDark ? const Color(0xFF0A0A0A) : const Color(0xFFF5F5F5),
-      pinned: true,
-      elevation: 0,
+      pinned: true, // Keep app bar visible when scrolling
+      elevation: 0, // No shadow
       toolbarHeight: 70,
       title: Row(
         children: [
+          // Daily Planet logo on the left
           Image.asset(
             'assets/images/daily_planet_logo.png',
             height: 40,
             fit: BoxFit.contain,
           ),
-          const Spacer(),
+          const Spacer(), // Push right-side buttons to the end
+          // Weather widget (static display for demo)
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
@@ -136,6 +140,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               children: [
                 const Icon(Icons.wb_sunny, color: Color(0xFFE53935), size: 18),
                 const SizedBox(width: 6),
+                // Static temperature display
                 Text(
                   '26°C',
                   style: TextStyle(
@@ -148,6 +153,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ),
           const SizedBox(width: 8),
+          // Theme toggle button (light/dark mode)
           Container(
             decoration: BoxDecoration(
               color: isDark ? const Color(0xFF1A1A1A) : Colors.white,
@@ -155,15 +161,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
             child: Consumer(
               builder: (context, ref, _) {
+                // Watch theme mode to update icon
                 final themeMode = ref.watch(themeModeProvider);
                 final isLightMode = themeMode == ThemeMode.light;
                 return IconButton(
+                  // Show opposite mode icon (dark icon in light mode, vice versa)
                   icon: Icon(
                     isLightMode ? Icons.dark_mode : Icons.light_mode,
                     color: isDark ? Colors.white : Colors.black,
                     size: 22,
                   ),
                   onPressed: () {
+                    // Toggle between light and dark mode
                     ref.read(themeModeProvider.notifier).toggleTheme();
                   },
                 );
@@ -171,6 +180,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ),
           const SizedBox(width: 8),
+          // Profile button - opens bottom sheet with user info and logout
           Container(
             decoration: BoxDecoration(
               color: isDark ? const Color(0xFF1A1A1A) : Colors.white,
@@ -495,11 +505,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       final date = DateTime.parse(dateString);
       final now = DateTime.now();
       final difference = now.difference(date);
+      // Show minutes if less than 1 hour ago
       if (difference.inMinutes < 60) return '${difference.inMinutes}m ago';
+      // Show hours if less than 24 hours ago
       if (difference.inHours < 24) return '${difference.inHours}h ago';
+      // Show days if less than 1 week ago
       if (difference.inDays < 7) return '${difference.inDays}d ago';
+      // Show formatted date for older articles
       return DateFormat('MMM d').format(date);
     } catch (e) {
+      // Return empty string if date parsing fails
       return '';
     }
   }
@@ -567,7 +582,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ),
               onTap: () async {
+                // Close the profile sheet first
                 Navigator.pop(context);
+                // Show confirmation dialog before logging out
                 final shouldLogout = await showDialog<bool>(
                   context: context,
                   builder: (context) => AlertDialog(
@@ -586,6 +603,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                     ),
                     actions: [
+                      // Cancel button - returns false
                       TextButton(
                         onPressed: () => Navigator.pop(context, false),
                         child: Text(
@@ -595,6 +613,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           ),
                         ),
                       ),
+                      // Logout button - returns true
                       TextButton(
                         onPressed: () => Navigator.pop(context, true),
                         child: const Text(
@@ -605,6 +624,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ],
                   ),
                 );
+                // If user confirmed, perform logout via auth service
                 if (shouldLogout == true) {
                   final authService = ref.read(authServiceProvider);
                   await authService.logout();

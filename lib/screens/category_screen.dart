@@ -181,9 +181,6 @@ class CategoryScreen extends ConsumerWidget {
   }
 
   /// Build the top app bar with back button and category name
-  /// Parameters:
-  /// - context: BuildContext for navigation
-  /// - isDark: Whether dark mode is active
   Widget _buildAppBar(BuildContext context, bool isDark) {
     return Container(
       // App bar height
@@ -342,17 +339,25 @@ class CategoryScreen extends ConsumerWidget {
     );
   }
 
+  /// Format timestamp to relative time (e.g., "2h ago", "1d ago")
+  /// Falls back to "MMM d" format for dates older than 7 days
+  /// Returns empty string if date is invalid or empty
   String _formatTime(String dateString) {
     if (dateString.isEmpty) return '';
     try {
       final date = DateTime.parse(dateString);
       final now = DateTime.now();
       final difference = now.difference(date);
+      // Show minutes if less than 1 hour ago
       if (difference.inMinutes < 60) return '${difference.inMinutes}m ago';
+      // Show hours if less than 24 hours ago
       if (difference.inHours < 24) return '${difference.inHours}h ago';
+      // Show days if less than 1 week ago
       if (difference.inDays < 7) return '${difference.inDays}d ago';
+      // Show formatted date for older articles (e.g., "Feb 15")
       return DateFormat('MMM d').format(date);
     } catch (e) {
+      // Return empty string if date parsing fails
       return '';
     }
   }

@@ -7,8 +7,14 @@ class ExploreScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Check current theme mode for styling
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
+    // List of available news categories
+    // Each category has:
+    // - name: Display name shown to user
+    // - icon: Material icon representing the category
+    // - category: API parameter for filtering news
     final categories = [
       {
         'name': 'Politics',
@@ -35,17 +41,19 @@ class ExploreScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 20),
+            // Screen title in brand red color
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Text(
                 'Explore',
                 style: TextStyle(
-                  color: const Color(0xFFE53935),
+                  color: const Color(0xFFE53935), // Daily Planet red
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
                 ),
               ),
             ),
+            // Subtitle explaining the screen purpose
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Text(
@@ -57,18 +65,21 @@ class ExploreScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
+            // Grid of category cards
             Expanded(
               child: GridView.builder(
                 padding: const EdgeInsets.all(16),
+                // Grid configuration: 2 columns with spacing
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                  childAspectRatio: 1.4,
+                  crossAxisCount: 2, // Two cards per row
+                  crossAxisSpacing: 16, // Horizontal gap between cards
+                  mainAxisSpacing: 16, // Vertical gap between cards
+                  childAspectRatio: 1.4, // Width:height ratio for cards
                 ),
                 itemCount: categories.length,
                 itemBuilder: (context, index) {
                   final category = categories[index];
+                  // Build individual category card with extracted data
                   return _buildCategoryCard(
                     context,
                     name: category['name'] as String,
@@ -85,6 +96,7 @@ class ExploreScreen extends StatelessWidget {
     );
   }
 
+  // Build a category card with icon and name
   Widget _buildCategoryCard(
     BuildContext context, {
     required String name,
@@ -93,26 +105,29 @@ class ExploreScreen extends StatelessWidget {
     required bool isDark,
   }) {
     return GestureDetector(
+      // Navigate to CategoryScreen when card is tapped
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (_) => CategoryScreen(
-              category: categoryId,
-              categoryName: name,
+              category: categoryId, // API filter parameter
+              categoryName: name, // Display name for screen title
             ),
           ),
         );
       },
       child: Container(
         decoration: BoxDecoration(
+          // Card background based on theme
           color: isDark ? const Color(0xFF1A1A1A) : Colors.white,
           borderRadius: BorderRadius.circular(16),
+          // Add subtle shadow in light mode only
           boxShadow: isDark
               ? []
               : [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withValues(alpha: 0.05),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -121,20 +136,23 @@ class ExploreScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            // Circular icon container with light red background
             Container(
               width: 60,
               height: 60,
               decoration: BoxDecoration(
-                color: const Color(0xFFE53935).withOpacity(0.1),
+                color: const Color(0xFFE53935)
+                    .withValues(alpha: 0.1), // Light red tint
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 icon,
                 size: 30,
-                color: const Color(0xFFE53935),
+                color: const Color(0xFFE53935), // Brand red icon
               ),
             ),
             const SizedBox(height: 12),
+            // Category name below icon
             Text(
               name,
               style: TextStyle(
