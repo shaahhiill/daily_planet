@@ -580,63 +580,46 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
   /// Parameters:
   /// - isDark: Whether dark mode is active
   Widget _buildShareSection(bool isDark) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    // Row of social media icons
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        // "Share Article" heading
-        Text(
-          'Share Article',
-          style: TextStyle(
-            color: isDark ? Colors.white : Colors.black,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
+        // WhatsApp share button
+        _buildShareButton(
+          imagePath: 'assets/images/social/whatsapp.png',
+          color: Colors.black,
+          onTap: () => _shareToWhatsApp(),
+          isDark: isDark,
         ),
 
-        const SizedBox(height: 12),
+        const SizedBox(width: 12),
 
-        // Row of social media icons
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // WhatsApp share button
-            _buildShareButton(
-              imagePath: 'assets/images/social/whatsapp.png',
-              color: Colors.black,
-              onTap: () => _shareToWhatsApp(),
-              isDark: isDark,
-            ),
+        // Instagram share button
+        _buildShareButton(
+          imagePath: 'assets/images/social/instagram.png',
+          color: Colors.black,
+          onTap: () => _shareToInstagram(),
+          isDark: isDark,
+        ),
 
-            const SizedBox(width: 12),
+        const SizedBox(width: 12),
 
-            // Instagram share button
-            _buildShareButton(
-              imagePath: 'assets/images/social/instagram.png',
-              color: Colors.black,
-              onTap: () => _shareToInstagram(),
-              isDark: isDark,
-            ),
+        // Twitter share button
+        _buildShareButton(
+          imagePath: 'assets/images/social/twitter.png',
+          color: Colors.black,
+          onTap: () => _shareToTwitter(),
+          isDark: isDark,
+        ),
 
-            const SizedBox(width: 12),
+        const SizedBox(width: 12),
 
-            // Twitter share button
-            _buildShareButton(
-              imagePath: 'assets/images/social/twitter.png',
-              color: Colors.black,
-              onTap: () => _shareToTwitter(),
-              isDark: isDark,
-            ),
-
-            const SizedBox(width: 12),
-
-            // LinkedIn share button
-            _buildShareButton(
-              imagePath: 'assets/images/social/linkedin.png',
-              color: Colors.black,
-              onTap: () => _shareToLinkedIn(),
-              isDark: isDark,
-            ),
-          ],
+        // LinkedIn share button
+        _buildShareButton(
+          imagePath: 'assets/images/social/linkedin.png',
+          color: Colors.black,
+          onTap: () => _shareToLinkedIn(),
+          isDark: isDark,
         ),
       ],
     );
