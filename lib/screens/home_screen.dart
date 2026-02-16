@@ -138,7 +138,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           isDark ? const Color(0xFF0A0A0A) : const Color(0xFFF5F5F5),
       pinned: true, // Keep app bar visible when user scrolls down
       elevation: 0, // Remove shadow/elevation for flat design
-      toolbarHeight: 70, // Custom height to accommodate logo and buttons
+      toolbarHeight: 70, // Custom height to accommodate logo and buttons---
+      surfaceTintColor: Colors.transparent, // Remove default material overlay color
+      scrolledUnderElevation: 0, // No elevation when scrolled under
       title: Row(
         children: [
           // App logo displayed on the left side of header
