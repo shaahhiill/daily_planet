@@ -130,7 +130,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   /// Build the top app bar with logo, weather, theme toggle, and profile button
-  /// The app bar is pinned and stays visible when scrolling
   Widget _buildAppBar(bool isDark) {
     return SliverAppBar(
       // Match scaffold background color for seamless appearance
