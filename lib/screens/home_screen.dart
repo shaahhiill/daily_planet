@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
 import '../providers/news_provider.dart';
+import '../providers/weather_provider.dart';
 import '../models/article.dart';
 import '../providers/device_provider.dart';
 import '../providers/theme_provider.dart';
@@ -149,30 +150,70 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             fit: BoxFit.contain,
           ),
           const Spacer(), // Flexible space that pushes all following widgets to the right
-          // Weather display widget (static demo data, not live weather)
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              // Contrasting background: dark gray in dark mode, white in light mode
-              color: isDark ? const Color(0xFF1A1A1A) : Colors.white,
-              borderRadius: BorderRadius.circular(20), // Pill-shaped container
-            ),
-            child: Row(
-              children: [
-                // Sun icon in app's red accent color
-                const Icon(Icons.wb_sunny, color: Color(0xFFE53935), size: 18),
-                const SizedBox(width: 6),
-                // Display temperature (hardcoded for demo purposes)
-                Text(
-                  '26°C',
-                  style: TextStyle(
-                    color: isDark ? Colors.white : Colors.black,
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                  ),
+          // Live weather widget — fetches location & calls OpenWeatherMap
+          Consumer(
+            builder: (context, ref, _) {
+              final weatherAsync = ref.watch(weatherProvider);
+              return Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF1A1A1A) : Colors.white,
+                  borderRadius: BorderRadius.circular(20),
                 ),
-              ],
-            ),
+                child: weatherAsync.when(
+                  // Loading: tiny spinner
+                  loading: () => const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Color(0xFFE53935),
+                    ),
+                  ),
+                  // Error: graceful fallback
+                  error: (_, __) => Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.cloud_off,
+                        color: isDark ? Colors.white54 : Colors.black38,
+                        size: 16,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '--°C',
+                        style: TextStyle(
+                          color: isDark ? Colors.white54 : Colors.black38,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  // Data: real temperature + contextual icon
+                  data: (weather) {
+                    final icon = _weatherIcon(weather.weatherCode);
+                    final temp = weather.temperature.round();
+                    return Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(icon, color: const Color(0xFFE53935), size: 18),
+                        const SizedBox(width: 6),
+                        Text(
+                          '$temp°C',
+                          style: TextStyle(
+                            color: isDark ? Colors.white : Colors.black,
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              );
+            },
           ),
           const SizedBox(width: 8),
           // Theme toggle button - switches between light and dark mode
@@ -560,7 +601,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
+  /// Maps an OpenWeatherMap condition code to a Material icon.
+  /// Reference: https://openweathermap.org/weather-conditions
+  IconData _weatherIcon(int code) {
+    if (code >= 200 && code < 300) return Icons.thunderstorm; // Thunderstorm
+    if (code >= 300 && code < 400) return Icons.grain;        // Drizzle
+    if (code >= 500 && code < 600) return Icons.water_drop;  // Rain
+    if (code >= 600 && code < 700) return Icons.ac_unit;      // Snow
+    if (code >= 700 && code < 800) return Icons.foggy;        // Atmosphere (fog, mist, etc.)
+    if (code == 800) return Icons.wb_sunny;                    // Clear sky
+    if (code > 800) return Icons.cloud;                        // Cloudy
+    return Icons.wb_sunny;                                     // Default fallback
+  }
+
   /// Format timestamp to relative time (e.g., "2h ago", "1d ago")
+
   /// Converts ISO 8601 date strings to human-readable relative time
   String _formatTime(String dateString) {
     if (dateString.isEmpty) return '';
