@@ -4,13 +4,15 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../models/article.dart';
 
-/// Service for fetching news articles from NewsAPI
+/// Fetches news directly from NewsAPI.
+/// When Cloud Functions are deployed in the future, this will switch to
+/// reading from the Firestore cache instead.
 class NewsService {
   final String _apikey = dotenv.env['NEWS_API_KEY'] ?? '';
-  final String _baseUrl = 'https://newsapi.org/v2'; // NewsAPI base URL
+  final String _baseUrl = 'https://newsapi.org/v2';
 
   /// Fetch top headlines, optionally filtered by category.
-  /// Falls back to offline data if API call fails.
+  /// Falls back to offline data if the API call fails.
   Future<List<Article>> getTopHeadlines({String? category}) async {
     try {
       final url = category != null
@@ -28,13 +30,12 @@ class NewsService {
         throw Exception('Failed to load news');
       }
     } catch (e) {
-      // If API fails (no internet, rate limit, etc.), use offline data.
       return await _getOfflineNews();
     }
   }
 
   /// Search for news articles by keyword.
-  /// Falls back to offline data if API call fails.
+  /// Falls back to offline data if the API call fails.
   Future<List<Article>> searchNews(String query) async {
     try {
       final url =
@@ -54,7 +55,7 @@ class NewsService {
     }
   }
 
-  /// Load offline news from local JSON file (fallback when API is unavailable).
+  /// Fallback: loads bundled offline news when the API is unavailable.
   Future<List<Article>> _getOfflineNews() async {
     final jsonString =
         await rootBundle.loadString('assets/json/offline_news.json');

@@ -58,7 +58,6 @@ class DailyPlanetApp extends ConsumerWidget {
           primary: const Color(0xFFE53935), // Red brand color
           secondary: const Color(0xFF1976D2),
           surface: const Color(0xFFF5F5F5),
-          background: const Color(0xFFF5F5F5),
         ),
         scaffoldBackgroundColor: const Color(0xFFF5F5F5),
         appBarTheme: const AppBarTheme(
@@ -76,7 +75,6 @@ class DailyPlanetApp extends ConsumerWidget {
           primary: const Color(0xFFE53935), // Red brand color
           secondary: const Color(0xFF42A5F5),
           surface: const Color(0xFF111111),
-          background: const Color(0xFF0A0A0A),
         ),
         scaffoldBackgroundColor: const Color(0xFF0A0A0A),
         appBarTheme: const AppBarTheme(
