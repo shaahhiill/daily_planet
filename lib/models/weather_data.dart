@@ -1,14 +1,8 @@
-/// Holds the result from the OpenWeatherMap current-weather API.
+// Model for the data returned by the OpenWeatherMap API.
 class WeatherData {
-  /// Current temperature in Celsius.
-  final double temperature;
-
-  /// OWM weather condition code (used to pick the right icon).
-  /// See: https://openweathermap.org/weather-conditions
-  final int weatherCode;
-
-  /// Human-readable description, e.g. "light rain".
-  final String description;
+  final double temperature;  // Current temp in Celsius
+  final int weatherCode;     // OWM condition code (e.g. 800 = clear sky, 500 = light rain)
+  final String description;  // Short weather summary, e.g. "light rain"
 
   const WeatherData({
     required this.temperature,
@@ -16,6 +10,9 @@ class WeatherData {
     required this.description,
   });
 
+  // Parses the raw API JSON into a WeatherData object.
+  // The 'weather' key holds a list — we grab the first item for the code & description.
+  // 'temp' is cast via num first since the API can return it as int or double.
   factory WeatherData.fromJson(Map<String, dynamic> json) {
     final weather = (json['weather'] as List).first as Map<String, dynamic>;
     return WeatherData(
