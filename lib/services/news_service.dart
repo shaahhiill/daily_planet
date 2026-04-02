@@ -6,10 +6,9 @@ import '../models/article.dart';
 /// Fetches news from our own Node.js backend.
 /// The backend handles the NewsAPI calls and keeps the API key server-side.
 class NewsService {
-  // Point to your backend server. Change this to your deployed URL in production.
-  static const String _backendUrl = 'http://10.0.2.2:3000/api/news';
-  // Note: 10.0.2.2 is how Android emulators reach localhost on the host machine.
-  // For a real device on the same Wi-Fi, use your computer's local IP, e.g. http://192.168.1.x:3000/api/news
+  // Backend server address — your PC's local IP so a real phone can reach it.
+  // Make sure the phone and PC are on the same Wi-Fi network.
+  static const String _backendUrl = 'http://172.20.10.6:3000/api/news';
 
   /// Fetch top headlines, optionally filtered by category.
   /// Falls back to offline data if the backend is unreachable.
