@@ -1,0 +1,15 @@
+# Render deployment config — tells Render how to build and run the backend.
+services:
+  - type: web
+    name: daily-planet-api
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NEWS_API_KEY
+        sync: false          # You'll enter this manually in the Render dashboard
+      - key: WEATHER_API_KEY
+        sync: false          # You'll enter this manually in the Render dashboard
+      - key: PORT
+        value: 10000         # Render uses port 10000 by default

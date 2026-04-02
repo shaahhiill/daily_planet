@@ -1,0 +1,66 @@
+# Migrate Backend → Firebase Cloud Functions
+
+Firebase project: **`dailyplanet-72e33`**
+
+The existing `backend/` (Express server) will be replaced by a `functions/` folder that Firebase deploys directly to the cloud. The news and weather logic stays the same — only the wrapper changes.
+
+## User Review Required
+
+> [!IMPORTANT]
+> Firebase Cloud Functions requires the **Blaze (pay-as-you-go) plan** to call external APIs (NewsAPI, OpenWeatherMap). You must upgrade at:
+> **Firebase Console → Project Settings → Usage and billing → Modify plan → Blaze**
+>
+> Set a budget alert at $1 so you're notified before any real charges. With personal usage, cost will be $0.
+
+## Proposed Changes
+
+### Firebase Functions
+
+#### [NEW] `functions/package.json`
+Standard Firebase Functions Node.js project config with `axios`, `node-cache`, `firebase-functions`, `firebase-admin`.
+
+#### [NEW] `functions/index.js`
+Exports two HTTPS callable/onRequest functions:
+- `news` → handles `/headlines?category=` and `/search?q=`
+- `weather` → handles `?lat=&lon=`
+
+#### [NEW] `functions/services/newsService.js`
+Identical logic to current [backend/src/services/newsService.js](file:///c:/Users/shaah/OneDrive/Desktop/daily_planet/backend/src/services/newsService.js) — calls NewsAPI with 5-min cache.
+
+#### [NEW] `functions/services/weatherService.js`
+Identical logic to current [backend/src/services/weatherService.js](file:///c:/Users/shaah/OneDrive/Desktop/daily_planet/backend/src/services/weatherService.js) — calls OpenWeatherMap with 10-min cache.
+
+#### [NEW] `functions/.gitignore`
+Ignores `node_modules/`.
+
+---
+
+### Firebase Config
+
+#### [NEW] `.firebaserc`
+Links the project to `dailyplanet-72e33`.
+
+#### [NEW] `firebase.json`
+Tells Firebase to deploy from the `functions/` folder.
+
+---
+
+### Flutter
+
+#### [MODIFY] [lib/config.dart](file:///c:/Users/shaah/OneDrive/Desktop/daily_planet/lib/config.dart)
+Updates `backendUrl` to the deployed Firebase Functions URL:
+`https://us-central1-dailyplanet-72e33.cloudfunctions.net`
+
+---
+
+## Verification Plan
+
+### Deploy & Smoke Test
+1. Run `firebase deploy --only functions` from the project root
+2. Open browser and hit: `https://us-central1-dailyplanet-72e33.cloudfunctions.net/news/headlines`
+3. Should return a JSON list of articles
+4. Hit: `https://us-central1-dailyplanet-72e33.cloudfunctions.net/weather?lat=12.97&lon=77.59`
+5. Should return weather JSON
+
+### Flutter Test
+Run `flutter run` and verify news loads and weather shows on the home screen.

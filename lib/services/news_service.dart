@@ -2,22 +2,20 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import '../models/article.dart';
+import '../config.dart'; // Single place where the backend URL lives
 
 /// Fetches news from our own Node.js backend.
 /// The backend handles the NewsAPI calls and keeps the API key server-side.
 class NewsService {
-  // Backend server address — your PC's local IP so a real phone can reach it.
-  // Make sure the phone and PC are on the same Wi-Fi network.
-  static const String _backendUrl = 'http://172.20.10.6:3000/api/news';
+  static final String _base = '${AppConfig.backendUrl}/api/news';
 
   /// Fetch top headlines, optionally filtered by category.
   /// Falls back to offline data if the backend is unreachable.
   Future<List<Article>> getTopHeadlines({String? category}) async {
     try {
-      // Build the URL with an optional category filter.
       final url = category != null
-          ? '$_backendUrl/headlines?category=$category'
-          : '$_backendUrl/headlines';
+          ? '$_base/headlines?category=$category'
+          : '$_base/headlines';
 
       final response = await http.get(Uri.parse(url));
 
@@ -30,7 +28,7 @@ class NewsService {
         throw Exception('Backend returned ${response.statusCode}');
       }
     } catch (e) {
-      // If the backend is down or unreachable, fall back to offline data.
+      // If the backend is unreachable, fall back to offline data.
       return await _getOfflineNews();
     }
   }
@@ -39,7 +37,7 @@ class NewsService {
   /// Falls back to offline data if the backend is unreachable.
   Future<List<Article>> searchNews(String query) async {
     try {
-      final url = '$_backendUrl/search?q=${Uri.encodeComponent(query)}';
+      final url = '$_base/search?q=${Uri.encodeComponent(query)}';
       final response = await http.get(Uri.parse(url));
 
       if (response.statusCode == 200) {
