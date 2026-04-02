@@ -1,24 +1,26 @@
 import 'dart:convert';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import '../models/weather_data.dart';
 
-/// Fetches current weather from OpenWeatherMap for the device's location.
+/// Fetches weather from our own Node.js backend.
+/// The backend handles the OpenWeatherMap call and keeps the API key server-side.
 class WeatherService {
-  static const String _baseUrl =
-      'https://api.openweathermap.org/data/2.5/weather';
+  // Point to your backend server. Change this to your deployed URL in production.
+  static const String _backendUrl = 'http://10.0.2.2:3000/api/weather';
+  // Note: 10.0.2.2 is how Android emulators reach localhost on the host machine.
+  // For a real device on the same Wi-Fi, use your computer's local IP, e.g. http://192.168.1.x:3000/api/weather
 
   /// Returns current [WeatherData] for the device's GPS location.
-  /// Throws an exception if location is denied or the API call fails.
+  /// Throws an exception if location is denied or the backend call fails.
   Future<WeatherData> getWeather() async {
-    // 1. Ensure location services are enabled
+    // 1. Ensure location services are enabled.
     final serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       throw Exception('Location services are disabled.');
     }
 
-    // 2. Check / request location permission
+    // 2. Check / request location permission.
     LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
@@ -30,24 +32,21 @@ class WeatherService {
       throw Exception('Location permission permanently denied.');
     }
 
-    // 3. Get the current position
+    // 3. Get the device's current GPS position.
     final position = await Geolocator.getCurrentPosition(
       locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.low, // Low accuracy is enough for weather
+        accuracy: LocationAccuracy.low, // Low accuracy is enough for weather.
       ),
     );
 
-    // 4. Fetch weather from OpenWeatherMap
-    final apiKey = dotenv.env['WEATHER_API_KEY'] ?? '';
+    // 4. Send lat/lon to our backend — it fetches weather and returns the result.
     final uri = Uri.parse(
-      '$_baseUrl?lat=${position.latitude}&lon=${position.longitude}'
-      '&units=metric&appid=$apiKey',
+      '$_backendUrl?lat=${position.latitude}&lon=${position.longitude}',
     );
 
     final response = await http.get(uri);
     if (response.statusCode != 200) {
-      throw Exception(
-          'Weather API error: ${response.statusCode} ${response.body}');
+      throw Exception('Weather backend error: ${response.statusCode}');
     }
 
     final json = jsonDecode(response.body) as Map<String, dynamic>;

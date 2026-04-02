@@ -1,0 +1,9 @@
+# Ignore node_modules — these are installed via npm install, not committed to git.
+node_modules/
+
+# Ignore the real .env file — it contains secret API keys, never commit this.
+.env
+
+# Ignore OS noise files.
+.DS_Store
+Thumbs.db

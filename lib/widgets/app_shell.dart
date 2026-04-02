@@ -202,25 +202,20 @@ class _AppShellState extends ConsumerState<AppShell> {
                 builder: (context, ref, _) {
                   // Watch current theme mode
                   final themeMode = ref.watch(themeModeProvider);
-
-                  // For system mode, check the actual device brightness to decide
-                  // what the toggle should show (the opposite of what's currently active).
-                  final effectivelyLight = themeMode == ThemeMode.light ||
-                      (themeMode == ThemeMode.system &&
-                          MediaQuery.of(context).platformBrightness == Brightness.light);
+                  final isLightMode = themeMode == ThemeMode.light;
 
                   return Row(
                     children: [
                       Icon(
-                        // Show moon icon when light, sun icon when dark
-                        effectivelyLight ? Icons.dark_mode : Icons.light_mode,
+                        // Show sun icon in dark mode, moon in light mode
+                        isLightMode ? Icons.dark_mode : Icons.light_mode,
                         color: isDark ? Colors.white54 : Colors.black54,
                         size: 20,
                       ),
                       const SizedBox(width: 10),
                       Text(
-                        // Label shows what mode the toggle will switch TO
-                        effectivelyLight ? 'Dark Mode' : 'Light Mode',
+                        // Label changes based on current mode
+                        isLightMode ? 'Dark Mode' : 'Light Mode',
                         style: TextStyle(
                           color: isDark ? Colors.white54 : Colors.black54,
                           fontSize: 14,
