@@ -1,57 +1,59 @@
-import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../models/article.dart';
 
-/// Manages saved/bookmarked articles with local persistence
-/// Loads from device storage on startup, saves on add/remove
-/// Used in: saved screen, article detail screen (bookmark icon)
+// Firestore path: users/{uid}/savedArticles/{articleUrl}
+// Each saved article is stored as its own document, keyed by URL.
+
+/// Provides the saved articles list, scoped to the logged-in user.
 final savedArticlesProvider =
     StateNotifierProvider<SavedArticlesNotifier, List<Article>>((ref) {
   return SavedArticlesNotifier();
 });
 
-/// Handles all operations for managing saved articles
+/// Manages saved/bookmarked articles using Firestore as the backend.
+/// Articles are tied to the user's Firebase account — accessible on any device.
 class SavedArticlesNotifier extends StateNotifier<List<Article>> {
   SavedArticlesNotifier() : super([]) {
     _loadSavedArticles();
   }
 
-  final String _key = 'saved_articles';
+  // Reference to the current user's savedArticles collection in Firestore.
+  CollectionReference get _collection {
+    final uid = FirebaseAuth.instance.currentUser!.uid;
+    return FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .collection('savedArticles');
+  }
 
-  /// Loads saved articles from device storage
+  /// Loads all saved articles from Firestore on startup.
   Future<void> _loadSavedArticles() async {
-    final prefs = await SharedPreferences.getInstance();
-    final jsonString = prefs.getString(_key);
-    if (jsonString != null) {
-      final List<dynamic> jsonList = json.decode(jsonString);
-      state = jsonList.map((json) => Article.fromJson(json)).toList();
-    }
+    final snapshot = await _collection.get();
+    state = snapshot.docs
+        .map((doc) => Article.fromJson(doc.data() as Map<String, dynamic>))
+        .toList();
   }
 
-  /// Saves current list to device storage
-  Future<void> _saveToDisk() async {
-    final prefs = await SharedPreferences.getInstance();
-    final jsonList = state.map((article) => article.toJson()).toList();
-    await prefs.setString(_key, json.encode(jsonList));
-  }
-
-  /// Adds article to saved list (prevents duplicates by title)
+  /// Saves an article to Firestore. Uses the URL as the document ID
+  /// so duplicates are impossible (Firestore will just overwrite).
   Future<void> addArticle(Article article) async {
-    if (!state.any((a) => a.title == article.title)) {
-      state = [...state, article];
-      await _saveToDisk();
-    }
+    if (state.any((a) => a.url == article.url)) return; // Already saved.
+    final docId = Uri.encodeComponent(article.url ?? article.title ?? '');
+    await _collection.doc(docId).set(article.toJson());
+    state = [...state, article];
   }
 
-  /// Removes article from saved list
+  /// Removes an article from Firestore and updates the local state.
   Future<void> removeArticle(Article article) async {
-    state = state.where((a) => a.title != article.title).toList();
-    await _saveToDisk();
+    final docId = Uri.encodeComponent(article.url ?? article.title ?? '');
+    await _collection.doc(docId).delete();
+    state = state.where((a) => a.url != article.url).toList();
   }
 
-  /// Checks if article is already saved (for bookmark icon state)
+  /// Returns true if the article is already bookmarked.
   bool isSaved(Article article) {
-    return state.any((a) => a.title == article.title);
+    return state.any((a) => a.url == article.url);
   }
 }

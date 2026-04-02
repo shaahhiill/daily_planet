@@ -1,19 +1,22 @@
 import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import '../models/weather_data.dart';
-import '../config.dart'; // Single place where the backend URL lives
 
-/// Fetches weather from our own Node.js backend.
-/// The backend handles the OpenWeatherMap call and keeps the API key server-side.
+/// Fetches current weather from OpenWeatherMap for the device's location.
 class WeatherService {
-  static final String _base = '${AppConfig.backendUrl}/api/weather';
+  static const String _baseUrl =
+      'https://api.openweathermap.org/data/2.5/weather';
 
   /// Returns current [WeatherData] for the device's GPS location.
+  /// Throws an exception if location is denied or the API call fails.
   Future<WeatherData> getWeather() async {
     // 1. Ensure location services are enabled.
     final serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) throw Exception('Location services are disabled.');
+    if (!serviceEnabled) {
+      throw Exception('Location services are disabled.');
+    }
 
     // 2. Check / request location permission.
     LocationPermission permission = await Geolocator.checkPermission();
@@ -27,23 +30,27 @@ class WeatherService {
       throw Exception('Location permission permanently denied.');
     }
 
-    // 3. Get the device's current GPS position.
+    // 3. Get the current GPS position.
     final position = await Geolocator.getCurrentPosition(
-      locationSettings: const LocationSettings(accuracy: LocationAccuracy.low),
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.low, // Low accuracy is enough for weather.
+      ),
     );
 
-    // 4. Send lat/lon to the backend — it fetches weather and returns the result.
+    // 4. Fetch weather from OpenWeatherMap.
+    final apiKey = dotenv.env['WEATHER_API_KEY'] ?? '';
     final uri = Uri.parse(
-      '$_base?lat=${position.latitude}&lon=${position.longitude}',
+      '$_baseUrl?lat=${position.latitude}&lon=${position.longitude}'
+      '&units=metric&appid=$apiKey',
     );
 
     final response = await http.get(uri);
     if (response.statusCode != 200) {
-      throw Exception('Weather backend error: ${response.statusCode}');
+      throw Exception(
+          'Weather API error: ${response.statusCode} ${response.body}');
     }
 
-    return WeatherData.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
-    );
+    final json = jsonDecode(response.body) as Map<String, dynamic>;
+    return WeatherData.fromJson(json);
   }
 }

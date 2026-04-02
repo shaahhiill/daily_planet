@@ -1,21 +1,21 @@
 import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../models/article.dart';
-import '../config.dart'; // Single place where the backend URL lives
 
-/// Fetches news from our own Node.js backend.
-/// The backend handles the NewsAPI calls and keeps the API key server-side.
+/// Service for fetching news articles from NewsAPI
 class NewsService {
-  static final String _base = '${AppConfig.backendUrl}/api/news';
+  final String _apikey = dotenv.env['NEWS_API_KEY'] ?? '';
+  final String _baseUrl = 'https://newsapi.org/v2'; // NewsAPI base URL
 
   /// Fetch top headlines, optionally filtered by category.
-  /// Falls back to offline data if the backend is unreachable.
+  /// Falls back to offline data if API call fails.
   Future<List<Article>> getTopHeadlines({String? category}) async {
     try {
       final url = category != null
-          ? '$_base/headlines?category=$category'
-          : '$_base/headlines';
+          ? '$_baseUrl/top-headlines?country=us&category=$category&apiKey=$_apikey'
+          : '$_baseUrl/top-headlines?country=us&apiKey=$_apikey';
 
       final response = await http.get(Uri.parse(url));
 
@@ -25,19 +25,20 @@ class NewsService {
             .map((article) => Article.fromJson(article))
             .toList();
       } else {
-        throw Exception('Backend returned ${response.statusCode}');
+        throw Exception('Failed to load news');
       }
     } catch (e) {
-      // If the backend is unreachable, fall back to offline data.
+      // If API fails (no internet, rate limit, etc.), use offline data.
       return await _getOfflineNews();
     }
   }
 
   /// Search for news articles by keyword.
-  /// Falls back to offline data if the backend is unreachable.
+  /// Falls back to offline data if API call fails.
   Future<List<Article>> searchNews(String query) async {
     try {
-      final url = '$_base/search?q=${Uri.encodeComponent(query)}';
+      final url =
+          '$_baseUrl/everything?q=$query&apiKey=$_apikey&sortBy=publishedAt';
       final response = await http.get(Uri.parse(url));
 
       if (response.statusCode == 200) {
@@ -46,14 +47,14 @@ class NewsService {
             .map((article) => Article.fromJson(article))
             .toList();
       } else {
-        throw Exception('Backend search failed: ${response.statusCode}');
+        throw Exception('Failed to search news');
       }
     } catch (e) {
       return await _getOfflineNews();
     }
   }
 
-  /// Load offline news from local JSON file (fallback when backend is unavailable).
+  /// Load offline news from local JSON file (fallback when API is unavailable).
   Future<List<Article>> _getOfflineNews() async {
     final jsonString =
         await rootBundle.loadString('assets/json/offline_news.json');
