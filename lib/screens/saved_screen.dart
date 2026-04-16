@@ -16,29 +16,53 @@ class SavedScreen extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // Watch the saved articles provider
-    // This automatically rebuilds when articles are added/removed
-    final savedArticles = ref.watch(savedArticlesProvider);
+    final savedArticlesAsync = ref.watch(savedArticlesProvider);
 
     return Scaffold(
-      // Background color based on theme
       backgroundColor:
           isDark ? const Color(0xFF0A0A0A) : const Color(0xFFF5F5F5),
       body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Top section with title and article count
-            _buildHeader(savedArticles.length, isDark),
-
-            // Main content area - shows saved articles or empty state
-            Expanded(
-              child: savedArticles.isEmpty
-                  // EMPTY STATE: No saved articles yet
-                  ? _buildEmptyState(isDark)
-                  // ARTICLES LIST: Show all saved articles in horizontal format
-                  : _buildArticlesList(context, savedArticles, isDark),
-            ),
-          ],
+        child: savedArticlesAsync.when(
+          data: (articles) => Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildHeader(articles.length, isDark),
+              Expanded(
+                child: articles.isEmpty
+                    ? _buildEmptyState(isDark)
+                    : _buildArticlesList(context, articles, isDark),
+              ),
+            ],
+          ),
+          loading: () => Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildHeader(0, isDark),
+              const Expanded(
+                child: Center(
+                  child: CircularProgressIndicator(color: Color(0xFFE53935)),
+                ),
+              ),
+            ],
+          ),
+          error: (error, stack) => Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildHeader(0, isDark),
+              Expanded(
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(32),
+                    child: Text(
+                      'Error loading articles: $error',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: Color(0xFFE53935)),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
