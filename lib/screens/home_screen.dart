@@ -673,133 +673,187 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   /// Show profile bottom sheet with user info and logout option
   /// Displays user email and provides logout functionality
   void _showProfileSheet(BuildContext context, bool isDark) {
-    // Get currently authenticated user from auth provider
     final user = ref.read(authStateProvider).value;
 
-    // Show modal bottom sheet from bottom of screen
     showModalBottomSheet(
       context: context,
-      backgroundColor:
-          Colors.transparent, // Transparent to show custom decoration
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
       builder: (context) => Container(
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF1A1A1A) : Colors.white,
-          borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(20)), // Rounded top corners
+          color: isDark ? const Color(0xFF0F0F0F) : Colors.white,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.5),
+              blurRadius: 20,
+              spreadRadius: 5,
+            ),
+          ],
         ),
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.fromLTRB(24, 12, 24, 40),
         child: Column(
-          mainAxisSize: MainAxisSize.min, // Only take needed space
+          mainAxisSize: MainAxisSize.min,
           children: [
-            // Drag handle indicator at top of sheet
+            // Handle
             Container(
-              width: 40,
-              height: 4,
-              margin: const EdgeInsets.only(bottom: 20),
+              width: 50,
+              height: 5,
               decoration: BoxDecoration(
-                color: isDark ? Colors.white24 : Colors.black26,
-                borderRadius: BorderRadius.circular(2), // Rounded pill shape
+                color: isDark ? Colors.white12 : Colors.black12,
+                borderRadius: BorderRadius.circular(10),
               ),
             ),
-            // Profile icon in circular container
+            const SizedBox(height: 32),
+            
+            // Membership Card Design
             Container(
-              width: 70,
-              height: 70,
+              width: double.infinity,
+              padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: const Color(0xFFE53935)
-                    .withValues(alpha: 0.1), // Light red background
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.person,
-                size: 40,
-                color: Color(0xFFE53935), // Red icon
-              ),
-            ),
-            const SizedBox(height: 16),
-            // Display user's email address
-            Text(
-              user?.email ?? 'No email',
-              style: TextStyle(
-                color: isDark ? Colors.white : Colors.black,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 24),
-            // Divider line
-            Divider(color: isDark ? Colors.white12 : Colors.black12),
-            const SizedBox(height: 16),
-            // Logout button
-            ListTile(
-              leading: const Icon(
-                Icons.logout,
-                color: Color(0xFFE53935), // Red logout icon
-              ),
-              title: Text(
-                'Logout',
-                style: TextStyle(
-                  color: isDark ? Colors.white : Colors.black,
-                  fontWeight: FontWeight.w500,
+                gradient: LinearGradient(
+                  colors: isDark 
+                    ? [const Color(0xFF1E1E1E), const Color(0xFF121212)]
+                    : [const Color(0xFFF5F5F5), Colors.white],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(
+                  color: isDark ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.05),
+                  width: 1.5,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(isDark ? 0.4 : 0.05),
+                    blurRadius: 15,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
               ),
-              onTap: () async {
-                // Close the bottom sheet before showing dialog
-                Navigator.pop(context);
-                // Show confirmation dialog to prevent accidental logout
-                final shouldLogout = await showDialog<bool>(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    backgroundColor:
-                        isDark ? const Color(0xFF1A1A1A) : Colors.white,
-                    title: Text(
-                      'Logout',
-                      style: TextStyle(
-                        color: isDark ? Colors.white : Colors.black,
-                      ),
-                    ),
-                    content: Text(
-                      'Are you sure you want to logout?',
-                      style: TextStyle(
-                        color: isDark ? Colors.white70 : Colors.black87,
-                      ),
-                    ),
-                    actions: [
-                      // Cancel button - dismisses dialog without logging out
-                      TextButton(
-                        onPressed: () => Navigator.pop(context, false),
-                        child: Text(
-                          'Cancel',
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE53935),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Text(
+                          'DAILY PLANET',
                           style: TextStyle(
-                            color: isDark ? Colors.white54 : Colors.black54,
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 1,
                           ),
                         ),
                       ),
-                      // Confirm logout button - proceeds with logout
-                      TextButton(
-                        onPressed: () => Navigator.pop(context, true),
-                        child: const Text(
-                          'Logout',
-                          style:
-                              TextStyle(color: Color(0xFFE53935)), // Red text
-                        ),
+                      Icon(
+                        Icons.verified_user,
+                        color: const Color(0xFFE53935).withOpacity(0.8),
+                        size: 20,
                       ),
                     ],
                   ),
-                );
-                // Only logout if user confirmed in dialog
-                if (shouldLogout == true) {
-                  // Get auth service and call logout method
-                  final authService = ref.read(authServiceProvider);
-                  await authService
-                      .logout(); // This will navigate back to login screen
-                }
-              },
+                  const SizedBox(height: 40),
+                  Text(
+                    user?.email ?? 'anonymous@dailyplanet.com',
+                    style: TextStyle(
+                      color: isDark ? Colors.white : Colors.black,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Member since ${DateFormat('MMMM yyyy').format(DateTime.now())}',
+                    style: TextStyle(
+                      color: isDark ? Colors.white38 : Colors.black38,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 16),
+            
+            const SizedBox(height: 32),
+            
+            // Logout Button - Stylish
+            GestureDetector(
+              onTap: () async {
+                Navigator.pop(context); // Close sheet
+                _confirmLogout(context, isDark);
+              },
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 18),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE53935).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: const Color(0xFFE53935).withOpacity(0.2),
+                  ),
+                ),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.logout_rounded, color: Color(0xFFE53935), size: 20),
+                    SizedBox(width: 12),
+                    Text(
+                      'Logout Account',
+                      style: TextStyle(
+                        color: Color(0xFFE53935),
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
       ),
     );
+  }
+
+  void _confirmLogout(BuildContext context, bool isDark) async {
+    final shouldLogout = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: isDark ? const Color(0xFF1A1A1A) : Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: const Text('Logout'),
+        content: const Text('Are you sure you want to end your session?'),
+        actionsPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text('Cancel', style: TextStyle(color: isDark ? Colors.white38 : Colors.black38)),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFE53935),
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            child: const Text('Logout'),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldLogout == true) {
+      ref.read(authServiceProvider).logout();
+    }
   }
 }

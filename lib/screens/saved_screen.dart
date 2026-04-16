@@ -69,36 +69,49 @@ class SavedScreen extends ConsumerWidget {
   }
 
   /// Build the header section with title and article count
-  /// Parameters:
-  /// - count: Number of saved articles
-  /// - isDark: Whether dark mode is active
   Widget _buildHeader(int count, bool isDark) {
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // "Saved" title in red
-          Text(
-            'Saved',
-            style: TextStyle(
-              color: const Color(0xFFE53935),
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Saved',
+                style: TextStyle(
+                  color: Color(0xFFE53935),
+                  fontSize: 32,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -1,
+                ),
+              ),
+              if (count > 0)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE53935).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    '$count items',
+                    style: const TextStyle(
+                      color: Color(0xFFE53935),
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+            ],
           ),
-
-          const SizedBox(height: 8),
-
-          // Subtitle showing number of saved articles
+          const SizedBox(height: 4),
           Text(
-            count == 0
-                ? 'No saved articles yet' // Empty state message
-                : '$count ${count == 1 ? 'article' : 'articles'} saved', // Article count
+            'Your curated reading list',
             style: TextStyle(
-              // Dimmed text color based on theme
-              color: isDark ? Colors.white54 : Colors.black54,
+              color: isDark ? Colors.white38 : Colors.black38,
               fontSize: 14,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ],
@@ -106,129 +119,169 @@ class SavedScreen extends ConsumerWidget {
     );
   }
 
-  /// Build the empty state UI when no articles are saved
-  /// Shows icon and helpful message to guide user
-  /// Parameters:
-  /// - isDark: Whether dark mode is active
+  /// Build the enhanced empty state UI with 3D illustration
   Widget _buildEmptyState(bool isDark) {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // Large bookmark icon
-          Icon(
-            Icons.bookmark_outline,
-            size: 80,
-            // Dimmed icon color based on theme
-            color: isDark ? Colors.white24 : Colors.black26,
-          ),
-
-          const SizedBox(height: 16),
-
-          // Main message
-          Text(
-            'No saved articles yet',
-            style: TextStyle(
-              color: isDark ? Colors.white : Colors.black,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-
-          const SizedBox(height: 8),
-
-          // Helper text explaining how to save articles
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
-            child: Text(
-              'Tap the bookmark icon on any article to save it here',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: isDark ? Colors.white54 : Colors.black54,
-                fontSize: 14,
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // 3D Generated Illustration
+            Container(
+              height: 240,
+              width: 240,
+              decoration: BoxDecoration(
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFFE53935).withOpacity(0.15),
+                    blurRadius: 40,
+                    spreadRadius: 10,
+                  ),
+                ],
+              ),
+              child: Image.asset(
+                'assets/images/saved_empty_state.png',
+                fit: BoxFit.contain,
               ),
             ),
-          ),
-        ],
+            const SizedBox(height: 32),
+            Text(
+              'Your list is empty',
+              style: TextStyle(
+                color: isDark ? Colors.white : Colors.black,
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                letterSpacing: -0.5,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 48),
+              child: Text(
+                'Save interesting news stories to read them later, even when offline.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: isDark ? Colors.white38 : Colors.black38,
+                  fontSize: 15,
+                  height: 1.5,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  /// Build the scrollable list of saved articles in horizontal card format
-  /// Each article shows: image (right), text (left), author, time
-  /// Parameters:
-  /// - context: BuildContext for navigation
-  /// - articles: List of saved Article objects
-  /// - isDark: Whether dark mode is active
-  Widget _buildArticlesList(BuildContext context, List articles, bool isDark) {
+  /// Build the interactive list with Swipe-to-Delete
+  Widget _buildArticlesList(BuildContext context, List<Article> articles, bool isDark) {
     return ListView.builder(
-      // Padding around the entire list
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      // Number of articles to show
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
       itemCount: articles.length,
       itemBuilder: (context, index) {
-        // Get current article from list
         final article = articles[index];
-
-        // Return horizontal card for each article (same style as home screen)
-        return _buildHorizontalCard(context, article, articles, index, isDark);
+        
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: Consumer(
+            builder: (context, ref, child) {
+              return Dismissible(
+                key: Key(article.url ?? article.title ?? index.toString()),
+                direction: DismissDirection.endToStart,
+                onDismissed: (direction) {
+                  ref.read(savedArticlesProvider.notifier).removeArticle(article);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: const Text('Article removed from saved'),
+                      backgroundColor: const Color(0xFFE53935),
+                      behavior: SnackBarBehavior.floating,
+                      action: SnackBarAction(
+                        label: 'Undo',
+                        textColor: Colors.white,
+                        onPressed: () {
+                          ref.read(savedArticlesProvider.notifier).addArticle(article);
+                        },
+                      ),
+                    ),
+                  );
+                },
+                background: Container(
+                  alignment: Alignment.centerRight,
+                  padding: const EdgeInsets.only(right: 24),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE53935),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Icon(Icons.delete_outline, color: Colors.white, size: 28),
+                ),
+                child: _buildHorizontalCard(context, article, articles, index, isDark),
+              );
+            },
+          ),
+        );
       },
     );
   }
 
-  /// Build horizontal article card (text left, image right, author/time below)
-  /// Same style as home screen for consistency
-  /// Parameters:
-  /// - context: BuildContext for navigation
-  /// - article: Article to display
-  /// - articles: Full list for navigation
-  /// - index: Position in list
-  /// - isDark: Whether dark mode is active
-  Widget _buildHorizontalCard(BuildContext context, dynamic article,
-      List<dynamic> articles, int index, bool isDark) {
+  /// Premium Article Card with glassmorphic feel
+  Widget _buildHorizontalCard(BuildContext context, Article article,
+      List<Article> articles, int index, bool isDark) {
     return GestureDetector(
       onTap: () {
-        // Navigate to article detail screen when tapped
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (_) => ArticleDetailScreen(
               article: article,
-              articleList: articles.cast<Article>(),
+              articleList: articles,
               currentIndex: index,
             ),
           ),
         );
       },
       child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF1A1A1A) : Colors.white,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(isDark ? 0.3 : 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+          border: Border.all(
+            color: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.05),
+            width: 1,
+          ),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Article title and source on LEFT
+            // Text Content
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Source label in red
                   if (article.source != null)
-                    Text(
-                      article.source!,
-                      style: const TextStyle(
-                        color: Color(0xFFE53935),
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE53935).withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        article.source!.toUpperCase(),
+                        style: const TextStyle(
+                          color: Color(0xFFE53935),
+                          fontSize: 9,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0.5,
+                        ),
                       ),
                     ),
-
-                  const SizedBox(height: 6),
-
-                  // Article title
+                  const SizedBox(height: 10),
                   Text(
                     article.title ?? 'No title',
                     style: TextStyle(
@@ -236,72 +289,69 @@ class SavedScreen extends ConsumerWidget {
                       fontSize: 15,
                       fontWeight: FontWeight.bold,
                       height: 1.3,
+                      letterSpacing: -0.2,
                     ),
                     maxLines: 3,
                     overflow: TextOverflow.ellipsis,
                   ),
-
-                  const SizedBox(height: 6),
-
-                  // Author and time
-                  if (article.author != null || article.publishedAt != null)
-                    Text(
-                      '${article.author ?? 'Unknown'} • ${_formatTime(article.publishedAt ?? '')}',
-                      style: TextStyle(
-                        color: isDark ? Colors.white54 : Colors.black54,
-                        fontSize: 11,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                  const SizedBox(height: 10),
+                  Text(
+                    '${article.author ?? 'Daily Planet'} • ${_formatTime(article.publishedAt ?? '')}',
+                    style: TextStyle(
+                      color: isDark ? Colors.white38 : Colors.black38,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ],
               ),
             ),
-
-            const SizedBox(width: 12),
-
-            // Article thumbnail on RIGHT
+            const SizedBox(width: 16),
+            // High-quality Image
             if (article.urlToImage != null && article.urlToImage!.isNotEmpty)
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: CachedNetworkImage(
-                  imageUrl: article.urlToImage!,
-                  width: 100,
-                  height: 100,
-                  fit: BoxFit.cover,
-                  placeholder: (context, url) => Container(
-                    width: 100,
-                    height: 100,
-                    color: isDark
-                        ? const Color(0xFF2A2A2A)
-                        : const Color(0xFFE0E0E0),
+              Hero(
+                tag: 'saved_${article.url}',
+                child: Container(
+                  width: 90,
+                  height: 90,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
-                  errorWidget: (context, url, error) => Container(
-                    width: 100,
-                    height: 100,
-                    color: isDark
-                        ? const Color(0xFF2A2A2A)
-                        : const Color(0xFFE0E0E0),
-                    child: Icon(
-                      Icons.image_not_supported,
-                      size: 24,
-                      color: isDark ? Colors.white24 : Colors.black26,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: CachedNetworkImage(
+                      imageUrl: article.urlToImage!,
+                      fit: BoxFit.cover,
+                      placeholder: (context, url) => Container(
+                        color: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE0E0E0),
+                      ),
+                      errorWidget: (context, url, error) => Container(
+                        color: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE0E0E0),
+                        child: const Icon(Icons.broken_image_outlined, size: 24, color: Colors.white24),
+                      ),
                     ),
                   ),
                 ),
               )
             else
               Container(
-                width: 100,
-                height: 100,
+                width: 90,
+                height: 90,
                 decoration: BoxDecoration(
-                  color: isDark
-                      ? const Color(0xFF2A2A2A)
-                      : const Color(0xFFE0E0E0),
-                  borderRadius: BorderRadius.circular(8),
+                  color: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE0E0E0),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
-                  Icons.article,
+                  Icons.article_outlined,
                   size: 32,
                   color: isDark ? Colors.white24 : Colors.black26,
                 ),
@@ -312,28 +362,19 @@ class SavedScreen extends ConsumerWidget {
     );
   }
 
-  /// Format timestamp to relative time (e.g., "2h ago", "1d ago")
-  /// Parameters:
-  /// - dateString: ISO date string from API
   String _formatTime(String dateString) {
-    if (dateString.isEmpty) return '';
-
+    if (dateString.isEmpty) return 'Recent';
     try {
       final date = DateTime.parse(dateString);
       final now = DateTime.now();
       final difference = now.difference(date);
-
-      if (difference.inMinutes < 60) {
-        return '${difference.inMinutes}m ago';
-      } else if (difference.inHours < 24) {
-        return '${difference.inHours}h ago';
-      } else if (difference.inDays < 7) {
-        return '${difference.inDays}d ago';
-      } else {
-        return DateFormat('MMM d').format(date);
-      }
+      if (difference.inMinutes < 60) return '${difference.inMinutes}m ago';
+      if (difference.inHours < 24) return '${difference.inHours}h ago';
+      if (difference.inDays < 7) return '${difference.inDays}d ago';
+      return DateFormat('MMM d').format(date);
     } catch (e) {
-      return '';
+      return 'Recent';
     }
   }
 }
+
