@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'firebase_options.dart';
 import 'providers/theme_provider.dart';
 import 'providers/auth_provider.dart';
@@ -16,9 +15,6 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   try {
-    // Load environment variables from .env file (contains API keys)
-    await dotenv.load(fileName: ".env");
-
     // Initialize Firebase for user authentication
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
