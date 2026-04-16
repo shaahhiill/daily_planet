@@ -26,13 +26,23 @@ class WeatherDetailScreen extends ConsumerWidget {
       backgroundColor: isDark ? const Color(0xFF0A0A0A) : const Color(0xFFF0F4F8),
       body: Stack(
         children: [
-          // ── Background gradient blob at top ──────────────────────────────
+          // ── Background gradient blob at top (fades to transparent) ────────
           Positioned(
             top: 0,
             left: 0,
             right: 0,
-            height: 360,
-            child: Container(decoration: BoxDecoration(gradient: bgGradient)),
+            height: 480,
+            child: ShaderMask(
+              shaderCallback: (rect) => const LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Colors.white, Colors.transparent],
+                stops: [0.55, 1.0],
+              ).createShader(rect),
+              blendMode: BlendMode.dstIn,
+              child: Container(
+                  decoration: BoxDecoration(gradient: bgGradient)),
+            ),
           ),
 
           // ── Scrollable content ───────────────────────────────────────────
