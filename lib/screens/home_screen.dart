@@ -236,28 +236,40 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             },
           ),
           const SizedBox(width: 8),
-          // Theme toggle button - switches between light and dark mode
+          // Theme toggle button - cycles: auto (device) → light → dark → auto
           Container(
             decoration: BoxDecoration(
               color: isDark ? const Color(0xFF1A1A1A) : Colors.white,
-              shape: BoxShape.circle, // Circular background for icon button
+              shape: BoxShape.circle,
             ),
-            // Use Consumer to rebuild only this widget when theme changes
             child: Consumer(
               builder: (context, ref, _) {
-                // Watch theme mode provider to reactively update icon
                 final themeMode = ref.watch(themeModeProvider);
-                final isLightMode = themeMode == ThemeMode.light;
+
+                // Icon + tooltip reflect the CURRENT mode so the user knows
+                // what they're in, and tapping moves to the next state.
+                final IconData icon;
+                final String tooltip;
+                switch (themeMode) {
+                  case ThemeMode.system:
+                    icon    = Icons.brightness_auto;
+                    tooltip = 'Auto (device) — tap for Light';
+                  case ThemeMode.light:
+                    icon    = Icons.wb_sunny_outlined;
+                    tooltip = 'Light mode — tap for Dark';
+                  case ThemeMode.dark:
+                    icon    = Icons.dark_mode_outlined;
+                    tooltip = 'Dark mode — tap for Auto';
+                }
+
                 return IconButton(
-                  // Display icon representing the mode user can switch TO
-                  // (dark moon icon in light mode, light sun icon in dark mode)
+                  tooltip: tooltip,
                   icon: Icon(
-                    isLightMode ? Icons.dark_mode : Icons.light_mode,
+                    icon,
                     color: isDark ? Colors.white : Colors.black,
                     size: 22,
                   ),
                   onPressed: () {
-                    // Toggle theme when tapped
                     ref.read(themeModeProvider.notifier).toggleTheme();
                   },
                 );

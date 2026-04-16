@@ -58,12 +58,20 @@ class ThemeModeNotifier extends StateNotifier<ThemeMode> {
     await prefs.setString(_key, value); // Write the value to storage
   }
 
-  /// Switches the theme between light and dark when the user taps the toggle.
-  /// If the app is currently on light mode → switch to dark, and vice versa.
+  /// Cycles the theme through: system → light → dark → system.
+  /// This way the device preference is the default, and the user
+  /// can override it or return to auto at any time.
   Future<void> toggleTheme() async {
-    final newMode = state == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
-    state = newMode;               // Update the current theme immediately
-    await _saveThemeMode(newMode); // Save the choice so it persists after restart
+    final ThemeMode newMode;
+    if (state == ThemeMode.system) {
+      newMode = ThemeMode.light;
+    } else if (state == ThemeMode.light) {
+      newMode = ThemeMode.dark;
+    } else {
+      newMode = ThemeMode.system; // back to following the device
+    }
+    state = newMode;
+    await _saveThemeMode(newMode);
   }
 
   /// Resets the theme back to "system" mode.
