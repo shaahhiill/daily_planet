@@ -1,12 +1,11 @@
 import 'dart:convert';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import '../models/weather_data.dart';
 
 /// Fetches current weather and forecast from OpenWeatherMap for the device's location.
 class WeatherService {
-  static const String _base = 'https://api.openweathermap.org/data/2.5';
+  static const String _base = 'https://daily-planet-bice.vercel.app/api';
 
   // ── Permission / location helper ─────────────────────────────────────────
 
@@ -34,42 +33,40 @@ class WeatherService {
 
   // ── Public API ────────────────────────────────────────────────────────────
 
-  /// Returns current [WeatherData] for the device's GPS location.
+  /// Returns current [WeatherData] for the device's GPS location via backend.
   Future<WeatherData> getWeather() async {
     final position = await _getPosition();
-    final apiKey   = dotenv.env['WEATHER_API_KEY'] ?? '';
 
     final uri = Uri.parse(
       '$_base/weather'
       '?lat=${position.latitude}&lon=${position.longitude}'
-      '&units=metric&appid=$apiKey',
+      '&units=metric',
     );
 
     final response = await http.get(uri);
     if (response.statusCode != 200) {
       throw Exception(
-          'Weather API error: ${response.statusCode} ${response.body}');
+          'Weather Backend error: ${response.statusCode} ${response.body}');
     }
 
     return WeatherData.fromJson(
         jsonDecode(response.body) as Map<String, dynamic>);
   }
 
-  /// Returns 5-day / 3-hour [ForecastEntry] list for the device's location.
+  /// Returns 5-day / 3-hour [ForecastEntry] list via backend.
   Future<List<ForecastEntry>> getForecast() async {
     final position = await _getPosition();
-    final apiKey   = dotenv.env['WEATHER_API_KEY'] ?? '';
 
     final uri = Uri.parse(
       '$_base/forecast'
       '?lat=${position.latitude}&lon=${position.longitude}'
-      '&units=metric&appid=$apiKey',
+      '&units=metric',
     );
 
     final response = await http.get(uri);
     if (response.statusCode != 200) {
       throw Exception(
-          'Forecast API error: ${response.statusCode} ${response.body}');
+          'Forecast Backend error: ${response.statusCode} ${response.body}');
     }
 
     final json = jsonDecode(response.body) as Map<String, dynamic>;
