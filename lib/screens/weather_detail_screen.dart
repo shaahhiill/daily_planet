@@ -5,8 +5,7 @@ import 'package:intl/intl.dart';
 import '../models/weather_data.dart';
 import '../providers/weather_provider.dart';
 
-// ─── Entry point ────────────────────────────────────────────────────────────
-
+//Entry point
 class WeatherDetailScreen extends ConsumerWidget {
   /// Pass the already-loaded [WeatherData] so the hero header renders
   /// instantly without waiting for a second network call.
@@ -26,7 +25,7 @@ class WeatherDetailScreen extends ConsumerWidget {
       backgroundColor: isDark ? const Color(0xFF0A0A0A) : const Color(0xFFF0F4F8),
       body: Stack(
         children: [
-          // ── Background gradient blob at top (fades to transparent) ────────
+          // ── Background gradient blob at top (fades to transparent) 
           Positioned(
             top: 0,
             left: 0,
@@ -45,7 +44,7 @@ class WeatherDetailScreen extends ConsumerWidget {
             ),
           ),
 
-          // ── Scrollable content ───────────────────────────────────────────
+          // ── Scrollable content
           SafeArea(
             child: CustomScrollView(
               physics: const BouncingScrollPhysics(),
@@ -94,8 +93,7 @@ class WeatherDetailScreen extends ConsumerWidget {
     );
   }
 
-  // ─── Top bar ─────────────────────────────────────────────────────────────
-
+  //Top bar
   Widget _buildTopBar(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -119,7 +117,7 @@ class WeatherDetailScreen extends ConsumerWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 const Icon(Icons.location_on,
-                    color: Colors.white70, size: 14),
+                    color: Color(0xFFE53935), size: 14),
                 const SizedBox(width: 4),
                 Text(
                   'Just updated',
@@ -135,8 +133,7 @@ class WeatherDetailScreen extends ConsumerWidget {
     );
   }
 
-  // ─── Hero ────────────────────────────────────────────────────────────────
-
+  //Hero
   Widget _buildHero(
       BuildContext context, WeatherData w, bool isDark) {
     final hemisphere = w.lat >= 0 ? 'Northern' : 'Southern';
@@ -262,8 +259,7 @@ class WeatherDetailScreen extends ConsumerWidget {
     );
   }
 
-  // ─── Summary pill ────────────────────────────────────────────────────────
-
+  //Summary pill
   Widget _buildSummaryPill(WeatherData w, bool isDark) {
     final windKmh = (w.windSpeed * 3.6).round();
     final blurb   = _conditionBlurb(w.weatherCode, windKmh);
@@ -296,8 +292,7 @@ class WeatherDetailScreen extends ConsumerWidget {
     );
   }
 
-  // ─── Hourly strip ────────────────────────────────────────────────────────
-
+  //Hourly strip
   Widget _buildHourlyStrip(
       BuildContext context, List<ForecastEntry> entries, bool isDark) {
     // Take next 8 entries (24 hours) and prepend "Now" from current weather
@@ -308,10 +303,10 @@ class WeatherDetailScreen extends ConsumerWidget {
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 4, 16, 10),
-          child: Text(
+          child: const Text(
             'HOURLY FORECAST',
             style: TextStyle(
-              color: isDark ? Colors.white38 : Colors.black38,
+              color: Color(0xFFE53935),
               fontSize: 11,
               fontWeight: FontWeight.w700,
               letterSpacing: 1.2,
@@ -399,8 +394,7 @@ class WeatherDetailScreen extends ConsumerWidget {
     );
   }
 
-  // ─── Daily forecast ──────────────────────────────────────────────────────
-
+  // Daily forecast
   Widget _buildDailyForecast(
       BuildContext context, List<ForecastEntry> entries, bool isDark) {
     // Group by day, pick the noon-ish reading, compute min/max
@@ -413,13 +407,13 @@ class WeatherDetailScreen extends ConsumerWidget {
           padding: const EdgeInsets.fromLTRB(16, 4, 16, 10),
           child: Row(
             children: [
-              Icon(Icons.calendar_month_outlined,
-                  color: isDark ? Colors.white38 : Colors.black38, size: 14),
+              const Icon(Icons.calendar_month_outlined,
+                  color: Color(0xFFE53935), size: 14),
               const SizedBox(width: 6),
               Text(
                 '${days.length}-DAY FORECAST',
-                style: TextStyle(
-                  color: isDark ? Colors.white38 : Colors.black38,
+                style: const TextStyle(
+                  color: Color(0xFFE53935),
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 1.2,
@@ -562,8 +556,7 @@ class WeatherDetailScreen extends ConsumerWidget {
     );
   }
 
-  // ─── Detail grid ─────────────────────────────────────────────────────────
-
+  // Detail grid
   Widget _buildDetailGrid(
       BuildContext context, WeatherData w, bool isDark) {
     final windKmh = (w.windSpeed * 3.6).round();
@@ -617,10 +610,10 @@ class WeatherDetailScreen extends ConsumerWidget {
         children: [
           Padding(
             padding: const EdgeInsets.only(bottom: 10),
-            child: Text(
+            child: const Text(
               'WEATHER DETAILS',
               style: TextStyle(
-                color: isDark ? Colors.white38 : Colors.black38,
+                color: Color(0xFFE53935),
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 1.2,
@@ -664,12 +657,12 @@ class WeatherDetailScreen extends ConsumerWidget {
           Row(
             children: [
               Icon(item.icon,
-                  color: isDark ? Colors.white38 : Colors.black38, size: 16),
+                  color: const Color(0xFFE53935), size: 16),
               const SizedBox(width: 6),
               Text(
                 item.label.toUpperCase(),
                 style: TextStyle(
-                  color: isDark ? Colors.white38 : Colors.black38,
+                  color: isDark ? Colors.white70 : Colors.black87,
                   fontSize: 10,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.8,
@@ -699,8 +692,7 @@ class WeatherDetailScreen extends ConsumerWidget {
     );
   }
 
-  // ─── Shimmer / skeleton loaders ──────────────────────────────────────────
-
+  // Shimmer / skeleton loaders
   Widget _buildHourlyShimmer(bool isDark) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -739,8 +731,7 @@ class WeatherDetailScreen extends ConsumerWidget {
     );
   }
 
-  // ─── Helpers ─────────────────────────────────────────────────────────────
-
+  // Helpers
   /// Maps OWM condition code to a background gradient.
   LinearGradient _buildBgGradient(int code, bool isDark) {
     if (!isDark) {
@@ -926,8 +917,7 @@ class WeatherDetailScreen extends ConsumerWidget {
   }
 }
 
-// ─── Data helpers ────────────────────────────────────────────────────────────
-
+// Data helpers
 class _DaySummary {
   final String label;
   final double minTemp;
