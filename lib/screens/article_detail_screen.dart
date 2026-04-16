@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../models/article.dart';
 import '../providers/saved_provider.dart';
 import '../providers/news_provider.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 
 /// Article detail screen with swipe navigation
 class ArticleDetailScreen extends ConsumerStatefulWidget {
@@ -35,12 +36,66 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
   late Article currentArticle;
   late int currentIndex;
 
+  // TTS related state
+  final FlutterTts flutterTts = FlutterTts();
+  bool isSpeaking = false;
+
   @override
   void initState() {
     super.initState();
     // Initialize with the passed article
     currentArticle = widget.article;
     currentIndex = widget.currentIndex ?? 0;
+    _initTts();
+  }
+
+  @override
+  void dispose() {
+    flutterTts.stop();
+    super.dispose();
+  }
+
+  Future<void> _initTts() async {
+    await flutterTts.setLanguage("en-US");
+    await flutterTts.setSpeechRate(0.5);
+    await flutterTts.setVolume(1.0);
+    await flutterTts.setPitch(1.0);
+
+    flutterTts.setStartHandler(() {
+      setState(() => isSpeaking = true);
+    });
+
+    flutterTts.setCompletionHandler(() {
+      setState(() => isSpeaking = false);
+    });
+
+    flutterTts.setCancelHandler(() {
+      setState(() => isSpeaking = false);
+    });
+
+    flutterTts.setErrorHandler((msg) {
+      setState(() => isSpeaking = false);
+    });
+  }
+
+  Future<void> _toggleSpeech() async {
+    if (isSpeaking) {
+      await flutterTts.stop();
+      setState(() => isSpeaking = false);
+    } else {
+      String textToSpeak =
+          '${currentArticle.title ?? ''}. ${currentArticle.description ?? ''}';
+      if (textToSpeak.trim().isNotEmpty) {
+        await flutterTts.speak(textToSpeak);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('No text available to read'),
+            backgroundColor: Color(0xFFE53935),
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -112,6 +167,11 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
     setState(() {
       currentIndex--;
       currentArticle = widget.articleList![currentIndex];
+      // Stop speaking if moving to another article
+      if (isSpeaking) {
+        flutterTts.stop();
+        isSpeaking = false;
+      }
     });
   }
 
@@ -135,6 +195,11 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
     setState(() {
       currentIndex++;
       currentArticle = widget.articleList![currentIndex];
+      // Stop speaking if moving to another article
+      if (isSpeaking) {
+        flutterTts.stop();
+        isSpeaking = false;
+      }
     });
   }
 
@@ -230,8 +295,28 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
           ),
         ),
       ),
-      // Actions (save button)
+      // Actions (TTS and save button)
       actions: [
+        // TTS / Read Aloud button
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Container(
+            decoration: BoxDecoration(
+              color: isSpeaking
+                  ? const Color(0xFFE53935).withOpacity(0.9)
+                  : Colors.black.withOpacity(0.5),
+              shape: BoxShape.circle,
+            ),
+            child: IconButton(
+              icon: Icon(
+                isSpeaking ? Icons.stop_rounded : Icons.volume_up_rounded,
+                color: Colors.white,
+              ),
+              onPressed: _toggleSpeech,
+              tooltip: isSpeaking ? 'Stop Reading' : 'Read Aloud',
+            ),
+          ),
+        ),
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: Container(
