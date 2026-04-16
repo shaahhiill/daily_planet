@@ -7,3 +7,8 @@ import '../services/weather_service.dart';
 final weatherProvider = FutureProvider<WeatherData>((ref) async {
   return WeatherService().getWeather();
 });
+
+/// Provides the 5-day / 3-hour forecast entries for the device's location.
+final forecastProvider = FutureProvider<List<ForecastEntry>>((ref) async {
+  return WeatherService().getForecast();
+});

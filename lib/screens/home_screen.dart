@@ -9,6 +9,7 @@ import '../providers/device_provider.dart';
 import '../providers/theme_provider.dart';
 import '../providers/auth_provider.dart';
 import 'article_detail_screen.dart';
+import 'weather_detail_screen.dart';
 
 /// Home screen - displays top headlines with pull-to-refresh
 class HomeScreen extends ConsumerStatefulWidget {
@@ -154,63 +155,82 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           Consumer(
             builder: (context, ref, _) {
               final weatherAsync = ref.watch(weatherProvider);
-              return Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF1A1A1A) : Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: weatherAsync.when(
-                  // Loading: tiny spinner
-                  loading: () => const SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Color(0xFFE53935),
+              return GestureDetector(
+                // Navigate to detail screen only when weather data is loaded
+                onTap: weatherAsync.value != null
+                    ? () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => WeatherDetailScreen(
+                              weather: weatherAsync.value!,
+                            ),
+                          ),
+                        )
+                    : null,
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF1A1A1A) : Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: weatherAsync.when(
+                    // Loading: tiny spinner
+                    loading: () => const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Color(0xFFE53935),
+                      ),
                     ),
-                  ),
-                  // Error: graceful fallback
-                  error: (_, __) => Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.cloud_off,
-                        color: isDark ? Colors.white54 : Colors.black38,
-                        size: 16,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '--°C',
-                        style: TextStyle(
-                          color: isDark ? Colors.white54 : Colors.black38,
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                  // Data: real temperature + contextual icon
-                  data: (weather) {
-                    final icon = _weatherIcon(weather.weatherCode);
-                    final temp = weather.temperature.round();
-                    return Row(
+                    // Error: graceful fallback
+                    error: (_, __) => Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(icon, color: const Color(0xFFE53935), size: 18),
-                        const SizedBox(width: 6),
+                        Icon(
+                          Icons.cloud_off,
+                          color: isDark ? Colors.white54 : Colors.black38,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 4),
                         Text(
-                          '$temp°C',
+                          '--°C',
                           style: TextStyle(
-                            color: isDark ? Colors.white : Colors.black,
+                            color: isDark ? Colors.white54 : Colors.black38,
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                       ],
-                    );
-                  },
+                    ),
+                    // Data: real temperature + contextual icon + tap hint
+                    data: (weather) {
+                      final icon = _weatherIcon(weather.weatherCode);
+                      final temp = weather.temperature.round();
+                      return Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(icon, color: const Color(0xFFE53935), size: 18),
+                          const SizedBox(width: 6),
+                          Text(
+                            '$temp°C',
+                            style: TextStyle(
+                              color: isDark ? Colors.white : Colors.black,
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Icon(
+                            Icons.chevron_right,
+                            color: isDark ? Colors.white38 : Colors.black26,
+                            size: 14,
+                          ),
+                        ],
+                      );
+                    },
+                  ),
                 ),
               );
             },
@@ -293,7 +313,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 borderRadius: BorderRadius.circular(8),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
+                    color: Colors.black.withValues(alpha: 0.2),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -675,7 +695,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               height: 70,
               decoration: BoxDecoration(
                 color: const Color(0xFFE53935)
-                    .withOpacity(0.1), // Light red background
+                    .withValues(alpha: 0.1), // Light red background
                 shape: BoxShape.circle,
               ),
               child: const Icon(
