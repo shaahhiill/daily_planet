@@ -140,7 +140,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       pinned: true, // Keep app bar visible when user scrolls down
       elevation: 0, // Remove shadow/elevation for flat design
       toolbarHeight: 70, // Custom height to accommodate logo and buttons---
-      surfaceTintColor: Colors.transparent, // Remove default material overlay color
+      surfaceTintColor:
+          Colors.transparent, // Remove default material overlay color
       scrolledUnderElevation: 0, // No elevation when scrolled under
       title: Row(
         children: [
@@ -252,13 +253,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 final String tooltip;
                 switch (themeMode) {
                   case ThemeMode.system:
-                    icon    = Icons.brightness_auto;
+                    icon = Icons.brightness_auto;
                     tooltip = 'Auto (device) — tap for Light';
                   case ThemeMode.light:
-                    icon    = Icons.wb_sunny_outlined;
+                    icon = Icons.wb_sunny_outlined;
                     tooltip = 'Light mode — tap for Dark';
                   case ThemeMode.dark:
-                    icon    = Icons.dark_mode_outlined;
+                    icon = Icons.dark_mode_outlined;
                     tooltip = 'Dark mode — tap for Auto';
                 }
 
@@ -637,13 +638,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   /// Reference: https://openweathermap.org/weather-conditions
   IconData _weatherIcon(int code) {
     if (code >= 200 && code < 300) return Icons.thunderstorm; // Thunderstorm
-    if (code >= 300 && code < 400) return Icons.grain;        // Drizzle
-    if (code >= 500 && code < 600) return Icons.water_drop;  // Rain
-    if (code >= 600 && code < 700) return Icons.ac_unit;      // Snow
-    if (code >= 700 && code < 800) return Icons.foggy;        // Atmosphere (fog, mist, etc.)
-    if (code == 800) return Icons.wb_sunny;                    // Clear sky
-    if (code > 800) return Icons.cloud;                        // Cloudy
-    return Icons.wb_sunny;                                     // Default fallback
+    if (code >= 300 && code < 400) return Icons.grain; // Drizzle
+    if (code >= 500 && code < 600) return Icons.water_drop; // Rain
+    if (code >= 600 && code < 700) return Icons.ac_unit; // Snow
+    if (code >= 700 && code < 800)
+      return Icons.foggy; // Atmosphere (fog, mist, etc.)
+    if (code == 800) return Icons.wb_sunny; // Clear sky
+    if (code > 800) return Icons.cloud; // Cloudy
+    return Icons.wb_sunny; // Default fallback
   }
 
   /// Format timestamp to relative time (e.g., "2h ago", "1d ago")
@@ -705,22 +707,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
             ),
             const SizedBox(height: 32),
-            
-            // Logout Card Design
+
+            // Logout/email Card Design
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: isDark 
-                    ? [const Color(0xFF1E1E1E), const Color(0xFF121212)]
-                    : [const Color(0xFFF5F5F5), Colors.white],
+                  colors: isDark
+                      ? [const Color(0xFF1E1E1E), const Color(0xFF121212)]
+                      : [const Color(0xFFF5F5F5), Colors.white],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(24),
                 border: Border.all(
-                  color: isDark ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.05),
+                  color: isDark
+                      ? Colors.white.withOpacity(0.08)
+                      : Colors.black.withOpacity(0.05),
                   width: 1.5,
                 ),
                 boxShadow: [
@@ -738,7 +742,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
                           color: const Color(0xFFE53935),
                           borderRadius: BorderRadius.circular(12),
@@ -782,9 +787,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 32),
-            
+
             // Logout Button - Stylish
             GestureDetector(
               onTap: () async {
@@ -804,7 +809,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 child: const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.logout_rounded, color: Color(0xFFE53935), size: 20),
+                    Icon(Icons.logout_rounded,
+                        color: Color(0xFFE53935), size: 20),
                     SizedBox(width: 12),
                     Text(
                       'Logout Account',
@@ -832,11 +838,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: const Text('Logout'),
         content: const Text('Are you sure you want to end your session?'),
-        actionsPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        actionsPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text('Cancel', style: TextStyle(color: isDark ? Colors.white38 : Colors.black38)),
+            child: Text('Cancel',
+                style:
+                    TextStyle(color: isDark ? Colors.white38 : Colors.black38)),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
@@ -844,7 +853,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               backgroundColor: const Color(0xFFE53935),
               foregroundColor: Colors.white,
               elevation: 0,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
             ),
             child: const Text('Logout'),
           ),

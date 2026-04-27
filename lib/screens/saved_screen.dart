@@ -82,8 +82,8 @@ class SavedScreen extends ConsumerWidget {
                 'Saved',
                 style: TextStyle(
                   color: Color(0xFFE53935),
-                  fontSize: 32,
-                  fontWeight: FontWeight.w900,
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
                   letterSpacing: -1,
                 ),
               ),
@@ -126,25 +126,7 @@ class SavedScreen extends ConsumerWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // 3D Generated Illustration
-            Container(
-              height: 240,
-              width: 240,
-              decoration: BoxDecoration(
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFFE53935).withOpacity(0.15),
-                    blurRadius: 40,
-                    spreadRadius: 10,
-                  ),
-                ],
-              ),
-              child: Image.asset(
-                'assets/images/saved_empty_state.png',
-                fit: BoxFit.contain,
-              ),
-            ),
-            const SizedBox(height: 32),
+
             Text(
               'Your list is empty',
               style: TextStyle(
