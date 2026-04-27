@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
@@ -89,7 +90,8 @@ class SavedScreen extends ConsumerWidget {
               ),
               if (count > 0)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
                     color: const Color(0xFFE53935).withOpacity(0.1),
                     borderRadius: BorderRadius.circular(20),
@@ -126,7 +128,6 @@ class SavedScreen extends ConsumerWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-
             Text(
               'Your list is empty',
               style: TextStyle(
@@ -156,13 +157,14 @@ class SavedScreen extends ConsumerWidget {
   }
 
   /// Build the interactive list with Swipe-to-Delete
-  Widget _buildArticlesList(BuildContext context, List<Article> articles, bool isDark) {
+  Widget _buildArticlesList(
+      BuildContext context, List<Article> articles, bool isDark) {
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
       itemCount: articles.length,
       itemBuilder: (context, index) {
         final article = articles[index];
-        
+
         return Padding(
           padding: const EdgeInsets.only(bottom: 12),
           child: Consumer(
@@ -171,7 +173,10 @@ class SavedScreen extends ConsumerWidget {
                 key: Key(article.url ?? article.title ?? index.toString()),
                 direction: DismissDirection.endToStart,
                 onDismissed: (direction) {
-                  ref.read(savedArticlesProvider.notifier).removeArticle(article);
+                  HapticFeedback.mediumImpact();
+                  ref
+                      .read(savedArticlesProvider.notifier)
+                      .removeArticle(article);
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: const Text('Article removed from saved'),
@@ -181,7 +186,9 @@ class SavedScreen extends ConsumerWidget {
                         label: 'Undo',
                         textColor: Colors.white,
                         onPressed: () {
-                          ref.read(savedArticlesProvider.notifier).addArticle(article);
+                          ref
+                              .read(savedArticlesProvider.notifier)
+                              .addArticle(article);
                         },
                       ),
                     ),
@@ -194,9 +201,11 @@ class SavedScreen extends ConsumerWidget {
                     color: const Color(0xFFE53935),
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: const Icon(Icons.delete_outline, color: Colors.white, size: 28),
+                  child: const Icon(Icons.delete_outline,
+                      color: Colors.white, size: 28),
                 ),
-                child: _buildHorizontalCard(context, article, articles, index, isDark),
+                child: _buildHorizontalCard(
+                    context, article, articles, index, isDark),
               );
             },
           ),
@@ -234,7 +243,9 @@ class SavedScreen extends ConsumerWidget {
             ),
           ],
           border: Border.all(
-            color: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.05),
+            color: isDark
+                ? Colors.white.withOpacity(0.05)
+                : Colors.black.withOpacity(0.05),
             width: 1,
           ),
         ),
@@ -248,7 +259,8 @@ class SavedScreen extends ConsumerWidget {
                 children: [
                   if (article.source != null)
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: const Color(0xFFE53935).withOpacity(0.1),
                         borderRadius: BorderRadius.circular(6),
@@ -314,11 +326,16 @@ class SavedScreen extends ConsumerWidget {
                       imageUrl: article.urlToImage!,
                       fit: BoxFit.cover,
                       placeholder: (context, url) => Container(
-                        color: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE0E0E0),
+                        color: isDark
+                            ? const Color(0xFF2A2A2A)
+                            : const Color(0xFFE0E0E0),
                       ),
                       errorWidget: (context, url, error) => Container(
-                        color: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE0E0E0),
-                        child: const Icon(Icons.broken_image_outlined, size: 24, color: Colors.white24),
+                        color: isDark
+                            ? const Color(0xFF2A2A2A)
+                            : const Color(0xFFE0E0E0),
+                        child: const Icon(Icons.broken_image_outlined,
+                            size: 24, color: Colors.white24),
                       ),
                     ),
                   ),
@@ -329,7 +346,9 @@ class SavedScreen extends ConsumerWidget {
                 width: 90,
                 height: 90,
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE0E0E0),
+                  color: isDark
+                      ? const Color(0xFF2A2A2A)
+                      : const Color(0xFFE0E0E0),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
@@ -359,4 +378,3 @@ class SavedScreen extends ConsumerWidget {
     }
   }
 }
-

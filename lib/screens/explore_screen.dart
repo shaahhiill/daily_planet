@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'category_screen.dart';
 
 /// Explore screen - grid of news categories
@@ -105,8 +106,8 @@ class ExploreScreen extends StatelessWidget {
     required bool isDark,
   }) {
     return GestureDetector(
-      // Navigate to CategoryScreen when card is tapped
       onTap: () {
+        HapticFeedback.lightImpact();
         Navigator.push(
           context,
           MaterialPageRoute(

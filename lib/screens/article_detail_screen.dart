@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
@@ -332,11 +333,10 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
                 color: isSaved ? const Color(0xFFE53935) : Colors.white,
               ),
               onPressed: () {
+                HapticFeedback.lightImpact();
                 // Toggle save state when tapped
                 if (isSaved) {
-                  // Remove from saved articles
                   savedNotifier.removeArticle(currentArticle);
-                  // Show feedback to user
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text('Article removed from saved'),
@@ -345,9 +345,7 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
                     ),
                   );
                 } else {
-                  // Add to saved articles
                   savedNotifier.addArticle(currentArticle);
-                  // Show feedback to user
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text('Article saved'),
@@ -511,6 +509,8 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
             ],
           ),
 
+          const SizedBox(height: 12),
+
           const SizedBox(height: 24),
 
           // Divider line
@@ -665,40 +665,30 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
   /// Parameters:
   /// - isDark: Whether dark mode is active
   Widget _buildShareSection(bool isDark) {
-    // Row of social media icons
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        // WhatsApp share button
         _buildShareButton(
           imagePath: 'assets/images/social/whatsapp.png',
           color: Colors.black,
           onTap: () => _shareToWhatsApp(),
           isDark: isDark,
         ),
-
         const SizedBox(width: 12),
-
-        // Instagram share button
         _buildShareButton(
           imagePath: 'assets/images/social/instagram.png',
           color: Colors.black,
           onTap: () => _shareToInstagram(),
           isDark: isDark,
         ),
-
         const SizedBox(width: 12),
-
-        // Twitter share button
         _buildShareButton(
           imagePath: 'assets/images/social/twitter.png',
           color: Colors.black,
           onTap: () => _shareToTwitter(),
           isDark: isDark,
         ),
-
         const SizedBox(width: 12),
-
         // LinkedIn share button
         _buildShareButton(
           imagePath: 'assets/images/social/linkedin.png',

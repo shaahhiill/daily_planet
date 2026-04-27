@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // For HapticFeedback on tab taps
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../screens/home_screen.dart';
 import '../screens/explore_screen.dart';
@@ -104,12 +105,13 @@ class _AppShellState extends ConsumerState<AppShell> {
     );
   }
 
-  // Individual navigation icon button
+  // Individual navigation icon button with haptic feedback on tap
   Widget _buildNavIcon(
       IconData unselected, IconData selected, int index, bool isDark) {
     final isSelected = _currentIndex == index; // Check if this icon is active
     return GestureDetector(
       onTap: () {
+        HapticFeedback.selectionClick(); // Tactile feedback on every tab tap
         setState(() => _currentIndex = index);
         _pageController.animateToPage(index, // Animate to selected page
             duration: const Duration(milliseconds: 300),
@@ -150,8 +152,10 @@ class _AppShellState extends ConsumerState<AppShell> {
           ...List.generate(4, (index) {
             final isSelected = _currentIndex == index; // Check if active
             return GestureDetector(
-              onTap: () =>
-                  setState(() => _currentIndex = index), // Switch screen
+              onTap: () {
+                HapticFeedback.selectionClick(); // Haptic for landscape nav too
+                setState(() => _currentIndex = index); // Switch screen
+              },
               child: Container(
                 width: double.infinity,
                 padding:

@@ -67,7 +67,7 @@ class NewsCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
 
-                  // Time and author metadata
+                  // Time, author and read time metadata
                   Row(
                     children: [
                       if (article.publishedAt != null) ...[

@@ -32,6 +32,7 @@ class Article {
     );
   }
 
+
   Map<String, dynamic> toJson() {
     return {
       'source': source,

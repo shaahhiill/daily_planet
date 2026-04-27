@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
+import 'package:shimmer/shimmer.dart';
 import '../providers/news_provider.dart';
 import '../providers/weather_provider.dart';
 import '../models/article.dart';
@@ -39,9 +40,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           SafeArea(
             // Handle three async states: loading, error, and data
             child: newsAsync.when(
-              // Loading state: show centered red spinner while fetching news
-              loading: () => const Center(
-                child: CircularProgressIndicator(color: Color(0xFFE53935)),
+              // Loading state: shimmer skeleton cards
+              loading: () => SafeArea(
+                child: CustomScrollView(
+                  slivers: [
+                    _buildAppBar(isDark),
+                    SliverPadding(
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+                      sliver: SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (_, i) => _buildSkeletonCard(isDark),
+                          childCount: 5,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
               // Error state: display error icon and message if news fetch fails
               error: (error, stack) => Center(
@@ -77,10 +91,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     // 2. Wait for fresh data to be fetched from API
                     await ref.read(topHeadlinesProvider(null).future);
                   },
-                  // Use CustomScrollView with slivers for advanced scrolling effects
                   child: CustomScrollView(
                     slivers: [
-                      // Pinned app bar with logo, weather, theme toggle, and profile
                       _buildAppBar(isDark),
                       // Section header for news articles
                       SliverToBoxAdapter(
@@ -96,15 +108,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           ),
                         ),
                       ),
-                      // Scrollable list of news articles with horizontal padding
                       SliverPadding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         sliver: SliverList(
                           delegate: SliverChildBuilderDelegate(
                             (context, index) {
                               final article = articles[index];
-                              // Display first article as large featured card with image on top
-                              // Remaining articles shown as compact horizontal cards with image on right
                               if (index == 0) {
                                 return _buildFeaturedGridCard(
                                     article, articles, index, isDark);
@@ -112,7 +121,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               return _buildHorizontalNewsCard(
                                   article, articles, index, isDark);
                             },
-                            // Build one card per article
                             childCount: articles.length,
                           ),
                         ),
@@ -130,6 +138,64 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
     );
   }
+
+  /// Shimmer skeleton card shown while the news feed is loading
+  /// Mirrors the exact layout of a horizontal news card (text left, image right)
+  /// so the transition from skeleton → real content feels seamless.
+  /// Parameters:
+  /// - isDark: Whether dark mode is active (controls shimmer colors)
+  Widget _buildSkeletonCard(bool isDark) {
+    // Base color is the solid background of each skeleton block
+    final baseColor = isDark ? const Color(0xFF1E1E1E) : const Color(0xFFE0E0E0);
+    // Highlight color is the bright sweep that animates across the skeleton
+    final highlightColor = isDark ? const Color(0xFF2A2A2A) : const Color(0xFFF5F5F5);
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16), // Spacing between skeleton cards
+      child: Shimmer.fromColors(
+        baseColor: baseColor,
+        highlightColor: highlightColor, // Animating sweep passes through this color
+        child: Container(
+          height: 90, // Same height as a real horizontal card
+          decoration: BoxDecoration(
+            color: baseColor, // Card background
+            borderRadius: BorderRadius.circular(12), // Rounded corners to match real cards
+          ),
+          child: Row(
+            children: [
+              // Left side: text content placeholders (source, title lines, author)
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Container(height: 10, width: 80, color: baseColor),           // Source label
+                      Container(height: 12, width: double.infinity, color: baseColor), // Title line 1
+                      Container(height: 12, width: 200, color: baseColor),           // Title line 2
+                      Container(height: 10, width: 120, color: baseColor),           // Author/time line
+                    ],
+                  ),
+                ),
+              ),
+              // Right side: square image placeholder matching CachedNetworkImage size
+              Container(
+                width: 90,
+                height: 90,
+                margin: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: baseColor,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
 
   /// Build the top app bar with logo, weather, theme toggle, and profile button
   Widget _buildAppBar(bool isDark) {
@@ -434,9 +500,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     Text(
                       '${article.author ?? 'Unknown'} • ${_formatTime(article.publishedAt ?? '')}',
                       style: TextStyle(
-                        color: isDark
-                            ? Colors.white54
-                            : Colors.black54, // Muted color
+                        color: isDark ? Colors.white54 : Colors.black54,
                         fontSize: 11,
                       ),
                       maxLines: 1,
@@ -614,14 +678,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     overflow: TextOverflow.ellipsis, // Add ... if too long
                   ),
                   const SizedBox(height: 8),
-                  // Display author and static time (hardcoded for demo)
+                  // Display author and publish time if available
                   if (article.author != null || article.publishedAt != null)
                     Text(
-                      '${article.author ?? ''} • 1d ago',
+                      '${article.author ?? ''} • ${_formatTime(article.publishedAt ?? '')}',
                       style: TextStyle(
-                        color: isDark
-                            ? Colors.white54
-                            : Colors.black54, // Muted color
+                        color: isDark ? Colors.white54 : Colors.black54,
                         fontSize: 12,
                       ),
                     ),
