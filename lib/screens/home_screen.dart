@@ -212,10 +212,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       title: Row(
         children: [
           // App logo displayed on the left side of header
-          Image.asset(
-            'assets/images/daily_planet_logo.png',
-            height: 40,
-            fit: BoxFit.contain,
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: Image.asset(
+              'assets/images/daily_planet_logo.png',
+              height: 40,
+              fit: BoxFit.contain,
+            ),
           ),
           const Spacer(), // Flexible space that pushes all following widgets to the right
           // Live weather widget — fetches location & calls OpenWeatherMap

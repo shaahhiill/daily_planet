@@ -65,11 +65,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               // Daily Planet logo at top of login screen
-              Image.asset(
-                'assets/images/daily_planet_logo.png',
-                width: 260,
-                height: 80,
-                fit: BoxFit.contain,
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.asset(
+                  'assets/images/daily_planet_logo.png',
+                  width: 260,
+                  height: 80,
+                  fit: BoxFit.contain,
+                ),
               ),
               const SizedBox(height: 40),
               Text(
