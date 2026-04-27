@@ -706,7 +706,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
             const SizedBox(height: 32),
             
-            // Membership Card Design
+            // Logout Card Design
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(24),
