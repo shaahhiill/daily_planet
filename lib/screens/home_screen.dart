@@ -146,20 +146,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   /// - isDark: Whether dark mode is active (controls shimmer colors)
   Widget _buildSkeletonCard(bool isDark) {
     // Base color is the solid background of each skeleton block
-    final baseColor = isDark ? const Color(0xFF1E1E1E) : const Color(0xFFE0E0E0);
+    final baseColor =
+        isDark ? const Color(0xFF1E1E1E) : const Color(0xFFE0E0E0);
     // Highlight color is the bright sweep that animates across the skeleton
-    final highlightColor = isDark ? const Color(0xFF2A2A2A) : const Color(0xFFF5F5F5);
+    final highlightColor =
+        isDark ? const Color(0xFF2A2A2A) : const Color(0xFFF5F5F5);
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16), // Spacing between skeleton cards
+      padding:
+          const EdgeInsets.only(bottom: 16), // Spacing between skeleton cards
       child: Shimmer.fromColors(
         baseColor: baseColor,
-        highlightColor: highlightColor, // Animating sweep passes through this color
+        highlightColor:
+            highlightColor, // Animating sweep passes through this color
         child: Container(
           height: 90, // Same height as a real horizontal card
           decoration: BoxDecoration(
             color: baseColor, // Card background
-            borderRadius: BorderRadius.circular(12), // Rounded corners to match real cards
+            borderRadius: BorderRadius.circular(
+                12), // Rounded corners to match real cards
           ),
           child: Row(
             children: [
@@ -171,10 +176,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      Container(height: 10, width: 80, color: baseColor),           // Source label
-                      Container(height: 12, width: double.infinity, color: baseColor), // Title line 1
-                      Container(height: 12, width: 200, color: baseColor),           // Title line 2
-                      Container(height: 10, width: 120, color: baseColor),           // Author/time line
+                      Container(
+                          height: 10,
+                          width: 80,
+                          color: baseColor), // Source label
+                      Container(
+                          height: 12,
+                          width: double.infinity,
+                          color: baseColor), // Title line 1
+                      Container(
+                          height: 12,
+                          width: 200,
+                          color: baseColor), // Title line 2
+                      Container(
+                          height: 10,
+                          width: 120,
+                          color: baseColor), // Author/time line
                     ],
                   ),
                 ),
@@ -195,7 +212,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
     );
   }
-
 
   /// Build the top app bar with logo, weather, theme toggle, and profile button
   Widget _buildAppBar(bool isDark) {

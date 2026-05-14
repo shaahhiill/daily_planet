@@ -105,8 +105,11 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // Check if this article is currently saved
+    // We watch the full async state so a Firestore error doesn't crash the screen.
     final savedNotifier = ref.watch(savedArticlesProvider.notifier);
-    final isSaved = savedNotifier.isSaved(currentArticle);
+    final savedState = ref.watch(savedArticlesProvider);
+    // Safely derive isSaved — false when loading/error so the UI still renders.
+    final isSaved = savedState.valueOrNull?.any((a) => a.url == currentArticle.url) ?? false;
 
     return GestureDetector(
       // Detect horizontal swipe gestures

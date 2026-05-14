@@ -46,24 +46,58 @@ class SavedScreen extends ConsumerWidget {
               ),
             ],
           ),
-          error: (error, stack) => Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildHeader(0, isDark),
-              Expanded(
-                child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(32),
-                    child: Text(
-                      'Error loading articles: $error',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(color: Color(0xFFE53935)),
+          error: (error, stack) {
+            // Check if it's a permission error (not logged in / rules issue)
+            final isPermissionError = error.toString().contains('permission-denied');
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildHeader(0, isDark),
+                Expanded(
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(32),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            isPermissionError
+                                ? Icons.lock_outline
+                                : Icons.cloud_off_outlined,
+                            size: 56,
+                            color: isDark ? Colors.white24 : Colors.black26,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            isPermissionError
+                                ? 'Unable to load saved articles'
+                                : 'Something went wrong',
+                            style: TextStyle(
+                              color: isDark ? Colors.white : Colors.black,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            isPermissionError
+                                ? 'Please sign out and sign back in, then try again.'
+                                : 'Pull down to retry.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: isDark ? Colors.white38 : Colors.black38,
+                              fontSize: 14,
+                              height: 1.5,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            );
+          },
         ),
       ),
     );
