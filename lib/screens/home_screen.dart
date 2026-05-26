@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
@@ -34,28 +35,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       // Note: 0xFFF5F5F5 is an off-white that provides subtle contrast with white containers
       backgroundColor:
           isDark ? const Color(0xFF0A0A0A) : const Color(0xFFF5F5F5),
+      // Let the body extend behind the transparent status bar so there's no hard edge
+      extendBodyBehindAppBar: true,
       body: Stack(
         children: [
-          // Main content area wrapped in SafeArea to avoid system UI overlaps (notch, status bar, etc.)
-          SafeArea(
-            // Handle three async states: loading, error, and data
-            child: newsAsync.when(
+          // Main content area — the SliverAppBar handles top insets automatically
+          // when extendBodyBehindAppBar is true, so no SafeArea needed here.
+          newsAsync.when(
               // Loading state: shimmer skeleton cards
-              loading: () => SafeArea(
-                child: CustomScrollView(
-                  slivers: [
-                    _buildAppBar(isDark),
-                    SliverPadding(
-                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-                      sliver: SliverList(
-                        delegate: SliverChildBuilderDelegate(
-                          (_, i) => _buildSkeletonCard(isDark),
-                          childCount: 5,
-                        ),
+              loading: () => CustomScrollView(
+                slivers: [
+                  _buildAppBar(isDark),
+                  SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+                    sliver: SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (_, i) => _buildSkeletonCard(isDark),
+                        childCount: 5,
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
               // Error state: display error icon and message if news fetch fails
               error: (error, stack) => Center(
@@ -130,7 +130,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 );
               },
             ),
-          ),
           // Overlay banner that appears at top when device loses internet connection
           // Positioned above all content to alert user of offline status
           _buildOfflineBanner(ref, isDark),
@@ -221,10 +220,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           isDark ? const Color(0xFF0A0A0A) : const Color(0xFFF5F5F5),
       pinned: true, // Keep app bar visible when user scrolls down
       elevation: 0, // Remove shadow/elevation for flat design
-      toolbarHeight: 70, // Custom height to accommodate logo and buttons---
+      toolbarHeight: 70, // Custom height to accommodate logo and buttons
       surfaceTintColor:
           Colors.transparent, // Remove default material overlay color
       scrolledUnderElevation: 0, // No elevation when scrolled under
+      // Make the status bar area transparent so it blends into the background
+      systemOverlayStyle: SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness:
+            isDark ? Brightness.light : Brightness.dark,
+      ),
       title: Row(
         children: [
           // App logo displayed on the left side of header
