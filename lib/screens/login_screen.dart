@@ -51,21 +51,27 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
+      backgroundColor: isDark ? const Color(0xFF0A0A0A) : const Color(0xFFF5F5F5),
       body: AuthBackground(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 // Daily Planet logo with animation
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.asset(
-                    'assets/images/daily_planet_logo.png',
-                    width: 240,
-                    height: 70,
-                    fit: BoxFit.contain,
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Image.asset(
+                      'assets/images/daily_planet_logo.png',
+                      width: 240,
+                      height: 70,
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 )
                     .animate()
@@ -94,26 +100,28 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ),
                       ),
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Text(
                             'Welcome Back',
+                            textAlign: TextAlign.center,
                             style: TextStyle(
-                              fontSize: 26,
+                              fontSize: 28,
                               fontWeight: FontWeight.bold,
                               color: isDark ? Colors.white : Colors.black,
                               letterSpacing: -0.5,
                             ),
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 10),
                           Text(
                             'Enter your credentials to continue',
+                            textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 14,
                               color: isDark ? Colors.white60 : Colors.black54,
                             ),
                           ),
-                          const SizedBox(height: 32),
+                          const SizedBox(height: 36),
 
                           // Form Fields
                           _buildModernTextField(
@@ -246,58 +254,50 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     bool obscureText = false,
     VoidCallback? onToggleVisibility,
   }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: isDark ? Colors.white70 : Colors.black87,
+    return TextField(
+      controller: controller,
+      obscureText: obscureText,
+      style: TextStyle(
+        color: isDark ? Colors.white : Colors.black,
+        fontSize: 15,
+      ),
+      decoration: InputDecoration(
+        hintText: label,
+        hintStyle: TextStyle(
+          color: isDark ? Colors.white38 : Colors.black38,
+          fontSize: 15,
+          fontWeight: FontWeight.w400,
+        ),
+        prefixIcon: Icon(icon, size: 20, color: const Color(0xFFE53935)),
+        suffixIcon: isPassword
+            ? IconButton(
+                icon: Icon(
+                  obscureText
+                      ? Icons.visibility_outlined
+                      : Icons.visibility_off_outlined,
+                  size: 20,
+                  color: isDark ? Colors.white38 : Colors.black38,
+                ),
+                onPressed: onToggleVisibility,
+              )
+            : null,
+        filled: true,
+        fillColor: isDark
+            ? Colors.white.withValues(alpha: 0.05)
+            : Colors.black.withValues(alpha: 0.03),
+        contentPadding: const EdgeInsets.symmetric(vertical: 16),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(
+            color: Color(0xFFE53935),
+            width: 1.5,
           ),
         ),
-        const SizedBox(height: 8),
-        TextField(
-          controller: controller,
-          obscureText: obscureText,
-          style: TextStyle(
-            color: isDark ? Colors.white : Colors.black,
-            fontSize: 15,
-          ),
-          decoration: InputDecoration(
-            prefixIcon: Icon(icon, size: 20, color: const Color(0xFFE53935)),
-            suffixIcon: isPassword
-                ? IconButton(
-                    icon: Icon(
-                      obscureText
-                          ? Icons.visibility_outlined
-                          : Icons.visibility_off_outlined,
-                      size: 20,
-                      color: isDark ? Colors.white38 : Colors.black38,
-                    ),
-                    onPressed: onToggleVisibility,
-                  )
-                : null,
-            filled: true,
-            fillColor: isDark
-                ? Colors.white.withValues(alpha: 0.05)
-                : Colors.black.withValues(alpha: 0.03),
-            contentPadding: const EdgeInsets.symmetric(vertical: 16),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide.none,
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(
-                color: Color(0xFFE53935),
-                width: 1.5,
-              ),
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 }

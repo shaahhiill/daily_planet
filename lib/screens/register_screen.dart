@@ -63,21 +63,27 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
+      backgroundColor: isDark ? const Color(0xFF0A0A0A) : const Color(0xFFF5F5F5),
       body: AuthBackground(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 // Daily Planet logo
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.asset(
-                    'assets/images/daily_planet_logo.png',
-                    width: 200,
-                    height: 60,
-                    fit: BoxFit.contain,
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Image.asset(
+                      'assets/images/daily_planet_logo.png',
+                      width: 200,
+                      height: 60,
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 )
                     .animate()
@@ -92,7 +98,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   child: BackdropFilter(
                     filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                     child: Container(
-                      padding: const EdgeInsets.all(28),
+                      padding: const EdgeInsets.all(32),
                       decoration: BoxDecoration(
                         color: isDark
                             ? Colors.white.withValues(alpha: 0.05)
@@ -106,26 +112,28 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         ),
                       ),
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Text(
                             'Create Account',
+                            textAlign: TextAlign.center,
                             style: TextStyle(
-                              fontSize: 24,
+                              fontSize: 26,
                               fontWeight: FontWeight.bold,
                               color: isDark ? Colors.white : Colors.black,
                               letterSpacing: -0.5,
                             ),
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 10),
                           Text(
-                            'Join our community of readers',
+                            'Join Daily Planet and stay informed',
+                            textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 14,
                               color: isDark ? Colors.white60 : Colors.black54,
                             ),
                           ),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 32),
 
                           // Form Fields
                           _buildModernTextField(
@@ -134,14 +142,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                             controller: _nameController,
                             isDark: isDark,
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 20),
                           _buildModernTextField(
                             label: 'Email Address',
                             icon: Icons.alternate_email_rounded,
                             controller: _emailController,
                             isDark: isDark,
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 20),
                           _buildModernTextField(
                             label: 'Password',
                             icon: Icons.lock_outline_rounded,
@@ -153,7 +161,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                               setState(() => _obscurePassword = !_obscurePassword);
                             },
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 20),
                           _buildModernTextField(
                             label: 'Confirm Password',
                             icon: Icons.lock_reset_rounded,
@@ -179,7 +187,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                               ),
                             ),
 
-                          const SizedBox(height: 28),
+                          const SizedBox(height: 36),
 
                           // Register Button
                           SizedBox(
@@ -272,58 +280,50 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     bool obscureText = false,
     VoidCallback? onToggleVisibility,
   }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: isDark ? Colors.white70 : Colors.black87,
+    return TextField(
+      controller: controller,
+      obscureText: obscureText,
+      style: TextStyle(
+        color: isDark ? Colors.white : Colors.black,
+        fontSize: 15,
+      ),
+      decoration: InputDecoration(
+        hintText: label,
+        hintStyle: TextStyle(
+          color: isDark ? Colors.white38 : Colors.black38,
+          fontSize: 15,
+          fontWeight: FontWeight.w400,
+        ),
+        prefixIcon: Icon(icon, size: 20, color: const Color(0xFFE53935)),
+        suffixIcon: isPassword
+            ? IconButton(
+                icon: Icon(
+                  obscureText
+                      ? Icons.visibility_outlined
+                      : Icons.visibility_off_outlined,
+                  size: 20,
+                  color: isDark ? Colors.white38 : Colors.black38,
+                ),
+                onPressed: onToggleVisibility,
+              )
+            : null,
+        filled: true,
+        fillColor: isDark
+            ? Colors.white.withValues(alpha: 0.05)
+            : Colors.black.withValues(alpha: 0.03),
+        contentPadding: const EdgeInsets.symmetric(vertical: 16),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(
+            color: Color(0xFFE53935),
+            width: 1.5,
           ),
         ),
-        const SizedBox(height: 8),
-        TextField(
-          controller: controller,
-          obscureText: obscureText,
-          style: TextStyle(
-            color: isDark ? Colors.white : Colors.black,
-            fontSize: 15,
-          ),
-          decoration: InputDecoration(
-            prefixIcon: Icon(icon, size: 20, color: const Color(0xFFE53935)),
-            suffixIcon: isPassword
-                ? IconButton(
-                    icon: Icon(
-                      obscureText
-                          ? Icons.visibility_outlined
-                          : Icons.visibility_off_outlined,
-                      size: 20,
-                      color: isDark ? Colors.white38 : Colors.black38,
-                    ),
-                    onPressed: onToggleVisibility,
-                  )
-                : null,
-            filled: true,
-            fillColor: isDark
-                ? Colors.white.withValues(alpha: 0.05)
-                : Colors.black.withValues(alpha: 0.03),
-            contentPadding: const EdgeInsets.symmetric(vertical: 16),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide.none,
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(
-                color: Color(0xFFE53935),
-                width: 1.5,
-              ),
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 }
